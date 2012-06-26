@@ -729,7 +729,7 @@ char * argv[];
 void RankingHeur(h,reqs,comp,resultsfile)
 heur *h;
 Reqinfo * reqs;
-int *(comp)(Reqinfo * , Reqinfo * );
+int (*comp)(__const void *, __const void *);
 FILE * resultsfile;
 {
  int i,j, exec;
@@ -782,7 +782,7 @@ FILE * resultsfile;
 void RankingHeur2(h,reqs,comp,resultsfile)
 heur *h;
 Reqinfo * reqs;
-int *(comp)(Reqinfo * , Reqinfo * );
+int (*comp)(__const void *, __const void *);
 FILE * resultsfile;
 {
  int i,j, exec;
@@ -849,7 +849,7 @@ FILE * resultsfile;
 void RankingHeur3(h,reqs,comp,resultsfile)
 heur *h;
 Reqinfo * reqs;
-int *(comp)(Reqinfo * , Reqinfo * );
+int (*comp)(__const void *, __const void *);
 FILE * resultsfile;
 {
  int i,j, exec;
@@ -912,7 +912,7 @@ void H1(h, tcases, reqs,comp,resultsfile)
 heur * h;
 TCinfo * tcases;
 Reqinfo * reqs;
-int *(comp)(Reqinfo * , Reqinfo * );
+int (*comp)(__const void *, __const void *);
 FILE * resultsfile;
 {
  int i,j;
@@ -971,7 +971,7 @@ void H2(h, tcases, reqs,comp,resultsfile)
 heur * h;
 TCinfo * tcases;
 Reqinfo * reqs;
-int *(comp)(Reqinfo * , Reqinfo * );
+int (*comp)(__const void *, __const void *);
 FILE * resultsfile;
 {
  int i,j;
@@ -1040,7 +1040,7 @@ void DiceHeur(h, tcases, reqs,comp,resultsfile)
 heur * h;
 TCinfo * tcases;
 Reqinfo * reqs;
-int *(comp)(Reqinfo * , Reqinfo * );
+int (*comp)(__const void *, __const void *);
 FILE * resultsfile;
 {
  int i,j;
@@ -1168,7 +1168,7 @@ void RandomDiceHeur(h, tcases, reqs,comp,resultsfile)
 heur * h;
 TCinfo * tcases;
 Reqinfo * reqs;
-int *(comp)(Reqinfo * , Reqinfo * );
+int (*comp)(__const void *, __const void *);
 FILE * resultsfile;
 {
  int i,j, max_fail=0, max_succ=0;
