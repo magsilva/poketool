@@ -2,7 +2,6 @@
 // chanomat.c 	%I%	%Y%	%E%	%U%
 */
 
-#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +11,7 @@
 #include <alloc.h>
 #endif
 
+#include "util.h"
 #include "stack.h"
 #include "chanomat.h"
 

@@ -50,8 +50,9 @@ char * tabpath;
   raiz = NULL;
   while (fscanf(fp,"%s",linha) != EOF)
      { 
-       int n_match = (int) NULL;
-       raiz = tree_tipo(raiz,linha,1,&n_match);
+       //int n_match = (int) NULL;
+       int *n_match = (int *)NULL;
+       raiz = tree_tipo(raiz,linha,1,n_match);
      }
   fclose(fp);
 }

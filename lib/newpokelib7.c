@@ -14,7 +14,6 @@
 //
 */
 
-#include "util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +33,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#include "util.h"
 #include "hrotsem.h"
 
 /* Declaracao de Variaveis Globais */

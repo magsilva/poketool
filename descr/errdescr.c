@@ -1,4 +1,3 @@
-#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +13,7 @@
 
 #endif
 
+#include "util.h"
 #include "hrotsem.h"
 #include "tabelasli.h"
 #include "hparserg.h"

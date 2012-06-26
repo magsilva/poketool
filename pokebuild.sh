@@ -5,7 +5,8 @@
 # Setting up environment varables
 
 ARCH=`arch`
-DATE=`date +%F`
+#VERSION=`date +%F`
+VERSION="SVN"
 CC=gcc
 DIRPOKE=`pwd`
 
@@ -32,7 +33,7 @@ fi
 
 MODULES="li chanomat lib descr pokernel avaliador heuristic"
 
-echo $MODULES
+echo "Building modules: $MODULES"
 for mod in $MODULES
 do
   echo ""
@@ -75,36 +76,31 @@ then
    mkdir distrib
 else
    cd distrib
-   rm -f  bin/* bin/litabs/* bin/poketabs/* docs/* docs/CVS/*
-   rmdir bin/litabs bin/poketabs docs/CVS docs bin 
+   rm -rf bin docs
 fi
 
-cd $DIRPOKE
-
-cd distrib
+cd $DIRPOKE/distrib
 
 if ! cp -r $DIRPOKE/bin .
 then
- echo "Poketool distribution $ARCH generation for failed." 
+  echo "Poketool distribution generation for [$ARCH] failed." 
 fi
 
 if cp -r $DIRPOKE/docs .
 then
- rm -f $DIRPOKE/docs/CVS/* 
- rmdir $DIRPOKE/docs/CVS
+  rm -rf $DIRPOKE/docs/CVS
 else
- echo "Poketool distribution $ARCH generation for failed." 
+  echo "Poketool distribution generation for [$ARCH] failed." 
 fi
 
-if tar czf poke-$ARCH-$DATE.tgz *
+if tar czf poke-$ARCH-$VERSION.tgz bin docs
 then 
- echo "Poketool distribution generation was successful."
+  echo "Poketool distribution generation for [$ARCH] in 'distrib' was successful."
 else
- echo "Poketool distribution generation for failed." 
+  echo "Poketool distribution generation for [$ARCH] failed." 
 fi
 
 # Clean up
 
-rm -f $DIRPOKE/distrib/docs/*
-rm -f -r $DIRPOKE/distrib/bin/*
-rmdir docs bin
+#rm -rf $DIRPOKE/distrib/docs/*
+#rm -rf $DIRPOKE/distrib/bin/*

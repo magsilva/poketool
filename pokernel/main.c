@@ -2,7 +2,6 @@
 // main.c			%I%	%Y%	%E% %U%
 */
 
-#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +17,7 @@
 
 #endif
 
+#include "util.h"
 #include "hparserg.h"
 #include "hrotsem.h"
 #include "header.h"
