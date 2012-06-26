@@ -1,0 +1,32 @@
+# ----------------------------------------------------------------------------
+# %W%	%Y%	%E%
+#
+# %Q%
+#
+# Data da ultima alteracao:
+#
+#		%E% %U%
+#
+# ----------------------------------------------------------------------------
+#
+E =
+O = o
+COPY = cp
+DEL = rm
+MODEXT = newli
+MODINT = newli 
+TABS = tabsin.c tabtrans.c tabchave.c tipos.c
+LITABS= litabs
+#
+# ----------------------------------------------------------------------------
+# Macros para gerar o executavel.
+# ----------------------------------------------------------------------------
+#
+COMF1 = $(CC) $(LDFLAGS) $(OBJS) -o $(MODEXT)
+COMF2 = $(COPY) $(MODEXT) $(BIN)/$(MODINT)  
+COMF3 = $(COPY) $(TABS)  $(BIN)/$(LITABS)
+#COMF4 = $(DEL) $(MODEXT)
+COMF5 =
+COMF6 =
+COMF7 =
+COMF8 =

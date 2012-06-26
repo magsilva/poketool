@@ -1,0 +1,267 @@
+#!/bin/sh
+
+###############################################################################
+#									      #	
+# pokeexec -- Shell file to execute test cases and save their inputs, paths   #
+#	       and outputs.						      #
+#									      #	
+# Author: Marcos L. Chaim						      #
+# Date: 94/7/6								      #
+#									      # 
+# Changes:								      #
+# 95/03/17 - Multiunits treatment inserted. -- Chaim			      #
+#									      #	
+###############################################################################
+
+case $# in
+
+0) echo 'Uso: pokeexec <programa executavel> -ltrnum -f<nome da funcao> [-f<nome da funcao>]'  1>&2 ; 
+   echo '-l - programa aceita parametro na linha de comando.' 1>&2;
+   echo '-t - programa aceita entrada pelo teclado.' 1>&2;
+   echo '-rnum - retoma a execucao de casos de testes a partir do caso de teste num.' 1>&2;
+   exit 2;;
+
+1) echo 'pokeexec erro: numero incorreto de parametros!' 1>&2 ;
+   echo 'Uso: pokeexec <programa executavel> -f<nome da funcao> [-f<nome da funcao>]'  1>&2 ; 
+   echo '-l - programa aceita parametro na linha de comando.' 1>&2;
+   echo '-t - programa aceita entrada pelo teclado.' 1>&2;
+   echo '-rnum - retoma a execucao de casos de testes a partir do caso de teste num.' 1>&2;
+   exit 2;;
+
+*) program=$1;;
+
+esac
+
+# Test if executable file exists.
+
+if test -x $program
+then
+	:
+else
+	echo "pokeexec erro: Nao existe o programa executavel $program !"
+	exit 2
+fi
+
+# Get functions name
+
+shift
+
+while test "$1" != ""
+	do
+	case $1 in
+	+l) linepars=true;;
+
+	-l) linepars=false;;
+
+	-r*) recover=true;
+	     num=`echo $1 | sed 's/-r//g'`;
+             counter=$num;;
+
+	+t) keyboard=true;;
+
+	-t) keyboard=false;;
+
+	 *) funcs="$funcs $1"
+	esac
+	shift
+	done
+
+# set recover var
+
+if test "$recover" = ""
+then
+	recover=false;
+fi
+
+#echo $linepars
+#echo $recover
+#echo $keyboard
+#echo $num $counter
+
+# Find directories of the functions to be tested
+
+for mod in  `echo $funcs | sed 's/-f//g'`
+	do
+	if test -d $mod
+	then
+		:
+	else
+		echo "pokeexec erro: Nao existe o diretorio preparado para a funcao \"$mod\""
+		exit 2
+	fi
+	done
+
+echo "pokeexec mensagem: Comecando sessao de teste para o programa \"$program\" ..."
+
+echo ""
+
+if test -d output
+then
+
+	if test "$recover" != "true"
+	then
+		echo "pokeexec mensagem: removendo todos os arquivos do diretorio \"output\""
+		rm -f output/*.tes
+	fi
+else
+	mkdir output
+fi
+
+
+# Verify line paramenters input
+
+if test "$linepars" = ""
+then
+	echo "pokeexec: \"$program\" aceita parametros em linha de comando ? (s/n) [s]"
+	read linepars
+	if test "$linepars" = n
+		then
+			linepars=false
+		else
+			linepars=true
+	fi
+fi
+
+if test "$linepars" = "true"
+	then
+		if test -d input
+		then
+			if test "$recover" != true
+			then
+				echo "pokeexec mensagem: removendo todos os arquivos do diretorio \"input\""
+				rm -f input/*.tes
+			fi
+		else
+			mkdir input
+		fi
+
+	fi
+
+#echo $linepars
+
+# Verify keyboard input 
+
+if test "$keyboard" = ""
+then
+	echo "pokeexec: \"$program\" recebe entrada pelo teclado? (s/n) [s]"
+	read keyboard
+	if test "$keyboard" = n
+	then
+		keyboard=false
+	else
+		keyboard=true
+	fi
+fi
+
+if test "$keyboard" = "true"
+then
+		if test -d keyboard
+		then
+			if test "$recover" != true
+			then
+				echo "pokeexec mensagem: removendo todos os arquivos do diretorio \"keyboard\""
+				rm -f keyboard/*.tes
+			fi
+		else
+			mkdir keyboard
+		fi
+
+	fi
+
+
+# execute test cases
+
+
+if test "$linepars" = "true"
+	then
+		if test "$keyboard" = "true"
+		then
+			# there is keyboard input and parameters input
+
+			echo 'pokeexec: Entre com os parametros de linha de comando:'
+			read pars
+			echo $pars > input/input$counter.tes
+			#echo "par e tec true"
+			tee keyboard/keyboard$counter.tes | $program $pars | tee output/output$counter.tes
+
+		else # keyboard is false
+			# There is no input from keyboard.
+
+			echo 'pokeexec: Entre com os parametros de linha de comando:'
+			read pars
+			echo $pars > input/input$counter.tes
+			echo $program $pars
+			#$program $pars | tee output/output$counter.tes
+			cmd=$program" "$pars" | tee output/output$counter.tes"
+			echo $cmd > cmd$$
+			chmod +x cmd$$
+			rm -f path.tes
+                        rm -f end-test-case
+			cmd$$
+			touch end-test-case			
+			while test -f cur-aval
+			do
+			   sleep 5
+			done
+			
+                        rm cmd$$
+		fi
+	else # linepars is false
+	# There is no input from line command invocation
+
+		if test "$keyboard" = "true"
+		then
+			# There is input from keyboard but not from line command
+			
+			#echo "par false e tec true"
+			tee keyboard/keyboard$counter.tes | $program | tee output/output$counter.tes
+		else
+			# Only execute program and save output
+			
+			#echo "par false e tec false"
+			$program | tee output/output$counter.tes
+		fi
+	fi
+
+	# save the path.tes file
+
+	for mod in  `echo $funcs | sed 's/-f//g'`
+	do
+	if test -f $mod/nosfreq.tes
+	then
+		mv $mod/nosfreq.tes $mod/nosfreq$counter.tes
+	fi
+	if test -f $mod/arcfreq.tes
+	then
+		mv $mod/arcfreq.tes $mod/arcfreq$counter.tes
+	fi	
+	if test -f $mod/pufreq.tes
+	then
+		mv $mod/pufreq.tes $mod/pufreq$counter.tes
+	fi
+	if test -f $mod/pudufreq.tes
+	then
+		mv $mod/pudufreq.tes $mod/pudufreq$counter.tes
+	fi	
+	if test -f $mod/pdufreq.tes
+	then
+		mv $mod/pdufreq.tes $mod/pdufreq$counter.tes
+	fi
+	if test -f $mod/pusesfreq.tes
+	then
+		mv $mod/pusesfreq.tes $mod/pusesfreq$counter.tes
+	fi	
+	if test -f $mod/usesfreq.tes
+	then
+		mv $mod/usesfreq.tes $mod/usesfreq$counter.tes
+	fi
+	if test -f $mod/dupathsfreq.tes
+	then
+		mv $mod/dupathsfreq.tes $mod/dufreq$counter.tes
+	fi
+	done
+
+	tar rvf 
+
+
+exit 0

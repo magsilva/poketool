@@ -1,0 +1,88 @@
+
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+# makefile		
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#	Makefile for General Functions of the POKE-TOOL
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+#	Author: Marcos L. Chaim
+#
+#	Date:26/12/94 
+#
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+
+
+SRCS = newpokelib0.c newpokelib1.c newpokelib2.c newpokelib3.c newpokelib4.c \
+       newpokelib5.c newpokelib6.c newpokelib7.c newpokelib8.c newpokelib9.c \
+       newpokelib10.o
+
+OBJS = $(ARCH)/newpokelib0.o $(ARCH)/newpokelib1.o $(ARCH)/newpokelib2.o \
+       $(ARCH)/newpokelib3.o $(ARCH)/newpokelib4.o $(ARCH)/newpokelib5.o \
+       $(ARCH)/newpokelib6.o $(ARCH)/newpokelib7.o $(ARCH)/newpokelib8.o \
+       $(ARCH)/newpokelib9.o $(ARCH)/newpokelib10.o
+
+
+#
+# Library with functions implemented for POKE-TOOL
+#
+
+#
+# POKE-TOOL library generation
+#
+
+LIBPOKE = $(DIRPOKE)/lib/libnewpoke.a
+
+# 
+# Commom Directory of includes
+#
+
+INCL = $(DIRPOKE)/include
+
+#
+# Flags used for compilation
+#
+
+GDB =
+LANG = -DMSGPORT # Mensagens em portugues
+CFLAGS= $(GDB) -DANSI_C $(LANG) -I$(INCL) -c $(@F:%.o=%.c) -o $(@)
+
+pokelib: $(OBJS) 
+	ar rv $(LIBPOKE) $(OBJS)
+	ranlib $(LIBPOKE)
+
+$(ARCH)/newpokelib0.o: newpokelib0.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS) 
+
+$(ARCH)/newpokelib1.o: newpokelib1.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS) 
+
+$(ARCH)/newpokelib2.o: newpokelib2.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib3.o: newpokelib3.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib4.o: newpokelib4.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib5.o: newpokelib5.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib6.o: newpokelib6.c $(INCL)/hparserg.h $(INCL)/hli.h \
+$(INCL)/tabelasli.h $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib7.o: newpokelib7.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib8.o: newpokelib8.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib9.o: newpokelib9.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)
+
+$(ARCH)/newpokelib10.o: newpokelib10.c $(INCL)/newpokelib.h 
+	$(CC) $(CFLAGS)

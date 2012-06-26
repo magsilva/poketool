@@ -1,0 +1,24 @@
+
+# ----------------------------------------------------------------------------
+# @(#)make.dos	3.1	
+#
+# 
+#
+# Data da ultima alteracao:
+#
+#		
+#
+# ----------------------------------------------------------------------------
+#
+CC = gcc
+LINK = gcc
+LIB = ar qv
+GDB = # -g
+WARN = 
+INCLS = -I. -I../include 
+LIB_DIR = /usr/lib
+
+
+CFLAGS = $(GDB) $(WARN) $(INCLS)
+LDFLAGS= -L$(LIB_DIR) 
+

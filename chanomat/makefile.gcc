@@ -1,0 +1,76 @@
+##########################################################################
+#									 #
+#	Makefile para a geracao do Modulo chanomat da POKE-TOOL          #
+#									 #
+#	Autor: Marcos L. Chaim						 #
+#	Data: 93/5/7							 #
+#									 #
+##########################################################################
+
+#
+# Arquitetura e compilador
+#
+# Obs.: eh necessario criar um diretorio com o nome da arquietura,
+#	pois eh onde serao salvados os arquivos objetos.
+#
+
+#
+# Diretorios
+#
+
+# Diretorio com os arquivos .h
+INCL=$(DIRPOKE)/include
+
+# Diretorio com os binarios
+BIN=$(DIRPOKE)/bin
+
+# 
+# Arquivos Fonte
+#
+
+MODLS = funcoes.c stack.c chanomat.c
+
+DOTH = $(INCL)/util.h $(INCL)/chanomat.h $(INCL)/stack.h
+
+#
+# Arquivos executaveis
+#
+
+E =
+
+MODINT =newchanomat$(E)
+MODEXT =newchanomat$(E)
+
+#
+# Arquivos Objeto
+#
+
+O = o
+OBJS = $(ARCH)/funcoes.$(O) $(ARCH)/stack.$(O) $(ARCH)/chanomat.$(O)
+
+#
+# Flags de compilacao
+#
+
+CFLAGS = $(GDB) -DANSI_C -I$(INCL) -c $(@F:%.o=%.c) -o $(@)
+
+all: chanomat checkout
+chanomat: $(OBJS)
+	$(CC) $(OBJS) -o newchanomat
+	cp newchanomat $(BIN)
+
+checkout: $(ARCH)/checkout.$(O)
+	$(CC) $(ARCH)/checkout.$(O) -o checkout
+	cp checkout $(BIN)
+
+$(ARCH)/funcoes.$(O): $(INCL)/chanomat.h  $(INCL)/stack.h $(INCL)/util.h funcoes.c
+	$(CC) $(CFLAGS) 
+
+$(ARCH)/stack.$(O): $(INCL)/stack.h $(INCL)/util.h stack.c
+	$(CC) $(CFLAGS) 
+
+$(ARCH)/chanomat.$(O): $(INCL)/stack.h $(INCL)/chanomat.h $(INCL)/util.h chanomat.c
+	$(CC) $(CFLAGS) 
+
+$(ARCH)/checkout.$(O): $(INCL)/stack.h $(INCL)/chanomat.h $(INCL)/util.h checkout.c
+	$(CC) $(CFLAGS) 

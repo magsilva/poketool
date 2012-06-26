@@ -1,0 +1,89 @@
+#!/bin/sh
+
+############################################################################
+#									   #
+# pokediff -- Shell file to check the differences between outputs.         #
+#									   #
+#									   #
+#									   #
+############################################################################
+
+echo 'pokediff - verifica a diferenca entre as saidas de um sessao de teste'
+
+case $# in
+
+0) echo 'Uso: pokediff <dir oraculo> <esp. oraculo> <dir saida obtida> <esp. saida> x y '  1>&2  ;
+   exit 2;;
+1) echo 'pokediff Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+2) echo 'pokediff Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+3) echo 'pokediff Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+4) echo 'pokediff Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+5) echo 'pokediff Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+6) dir_ora=$1; esp_ora=$2 dir_tcase=$3; esp_tcase=$4 beg=$5;
+   end=`expr $6 + 1`;;
+*) echo 'pokediff Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+esac
+
+
+# First test if the directories exist
+
+if  test -d $dir_ora
+then
+	:
+else
+	echo "pokediff: Erro: diretorio de oraculos \"$dir_ora\" nao existe"
+	exit 2
+fi
+
+if test -d $dir_tcase
+then
+	:
+else
+	echo "pokediff: diretorio de saidas nao existe \"$dir_tcase\" nao existe"
+        exit 2
+fi
+	
+echo $dir_ora $dir_tcase $esp_ora $ esp_tcase $beg $end
+
+#echo 'passei aqui'
+
+failure=0
+
+while test "$beg" != "$end"
+do
+
+	echo ''
+	echo "		**** Verificando Diferencas no Caso de Teste Numero $beg ****"
+	echo ''
+
+       if  test -f $dir_tcase/$esp_tcase$beg.tes
+       then
+           if  test -f $dir_ora/$esp_ora$beg.tes
+           then
+           # Check outputs
+	   if diff $dir_tcase/$esp_tcase$beg.tes  $dir_ora/$esp_ora$beg.tes > diff$beg
+	   then
+	     :
+	   else
+	     echo "pokediff: Msg: Caso de teste $beg manifestou uma FALHA"
+             failure=1
+	   fi  
+           else
+	     echo "pokediff: Msg: arquivo \"$dir_tcase/$esp_tcase$beg\" nao existe"
+           fi	  
+       else
+	  echo "pokediff: Msg: arquivo \"$dir_ora/$esp_ora$beg\" nao existe"
+       fi
+
+
+	beg=`expr $beg + 1`
+done
+
+if test "$failure" = "1"
+then
+    echo "pokediff: Msg: FALHAS foram detectadas pelo conjunto de casos de teste"
+else
+   echo "pokediff: Msg: Nenhuma falha foi detectada"
+fi
+
+exit 0

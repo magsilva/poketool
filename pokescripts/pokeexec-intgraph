@@ -1,0 +1,274 @@
+#!/bin/sh
+
+###############################################################################
+#									      #	
+# pokeexec -- Shell file to execute test cases and save their inputs, paths   #
+#	       and outputs.						      #
+#				
+#	
+# Author: Marcos L. Chaim						      #
+# Date: 94/7/6								      #
+#									      # 
+# Changes:								      #
+# 95/03/17 - Multiunits treatment inserted. -- Chaim	
+# 96/06/12 - Deletion of the file path.tes before the program execution - Sil #
+#									      #	
+###############################################################################
+
+case $# in
+
+0) echo 'Usage: pokeexec <executable program> -ltrnum -f<function name> [-f<function name>]'  1>&2 ; 
+   echo '-l - program accepts parameter in command line.' 1>&2;
+   echo '-t - program accepts keyboard input.' 1>&2;
+   echo '-rnum - takes the execution of test cases from test case 'num'.' 1>&2;
+   exit 2;;
+
+1) echo 'pokeexec error: incorrect number of parameters!' 1>&2 ;
+   echo 'Usage: pokeexec <executable program> -f<function name> [-f<function name>]'  1>&2 ; 
+   echo '-l - program accepts parameter in command line.' 1>&2;
+   echo '-t - program accepts keyboard input.' 1>&2;
+   echo '-rnum - takes the execution of test cases from test case 'num'.' 1>&2;
+   exit 2;;
+
+#0) echo 'Uso: pokeexec <programa executavel> -ltrnum -f<nome da funcao> [-f<nome da funcao>]'  #1>&2 ; 
+#   echo '-l - programa aceita parametro na linha de comando.' 1>&2;
+#   echo '-t - programa aceita entrada pelo teclado.' 1>&2;
+#   echo '-rnum - retoma a execucao de casos de testes a partir do caso de teste num.' 1>&2;
+#   exit 2;;
+#
+#1) echo 'pokeexec erro: numero incorreto de parametros!' 1>&2 ;
+#   echo 'Uso: pokeexec <programa executavel> -f<nome da funcao> [-f<nome da funcao>]'  1>&2 ; #
+#   echo '-l - programa aceita parametro na linha de comando.' 1>&2;
+#   echo '-t - programa aceita entrada pelo teclado.' 1>&2;
+#   echo '-rnum - retoma a execucao de casos de testes a partir do caso de teste num.' 1>&2;
+#   exit 2;;
+
+
+*) program=$1;;
+
+esac
+
+# Test if executable file exists.
+
+if test -x $program
+then
+	:
+else
+	echo "pokeexec error: Don't exist executable program $program !"
+	exit 2
+fi
+
+# Get functions name
+
+shift
+
+while test "$1" != ""
+	do
+	case $1 in
+	-l) linepars=true;;
+
+	-r*) recover=true;
+	     num=`echo $1 | sed 's/-r//g'`;
+             counter=$num;;
+
+	-t) keyboard=true;;
+
+	 *) funcs="$funcs $1"
+	esac
+	shift
+	done
+
+# set recover var
+
+if test "$recover" = ""
+then
+	recover=false;
+fi
+
+#echo $linepars
+#echo $recover
+#echo $keyboard
+#echo $num $counter
+
+# Find directories of the functions to be tested
+
+for mod in  `echo $funcs | sed 's/-f//g'`
+	do
+	if test -d $mod
+	then
+		:
+	else
+		echo "pokeexec error: Don't exists prepared directory to function \"$mod\""
+		exit 2
+	fi
+	done
+
+echo =========================
+echo "pokeexec: Starting test session to program \"$program\" ..."
+
+echo ""
+
+if test -d output
+then
+
+	if test "$recover" != "true"
+	then
+		echo "pokeexec: Deleting all files of the directory \"output\""
+		rm -f output/*.tes
+	fi
+else
+	mkdir output
+fi
+
+
+# Verify line paramenters input
+
+if test "$linepars" = ""
+then
+	echo "pokeexec: Accepts parameters in command line ? (y/n) [y]"
+	read linepars
+	if test "$linepars" = n
+		then
+			linepars=false
+		else
+			linepars=true
+	fi
+fi
+
+if test "$linepars" = "true"
+	then
+		if test -d input
+		then
+			if test "$recover" != true
+			then
+				echo "pokeexec: Deleting all files of the directory \"input\""
+				rm -f input/*.tes
+			fi
+		else
+			mkdir input
+		fi
+
+	fi
+
+#echo $linepars
+
+# Verify keyboard input 
+
+if test "$keyboard" = ""
+then
+	echo "pokeexec: Accepts keyboard input? (y/n) [y]"
+	read keyboard
+	if test "$keyboard" = n
+	then
+		keyboard=false
+	else
+		keyboard=true
+	fi
+fi
+
+if test "$keyboard" = "true"
+then
+		if test -d keyboard
+		then
+			if test "$recover" != true
+			then
+				echo "pokeexec: Deleting all files of the directory \"keyboard\""
+				rm -f keyboard/*.tes
+			fi
+		else
+			mkdir keyboard
+		fi
+
+	fi
+
+
+# execute test cases
+
+# initiate controling vars
+
+counter=1
+
+if test "$recover" = "true"
+then
+	if test "$num" != ""
+	then
+		counter=$num
+	fi
+fi
+
+#endofsession=y
+
+echo =========================
+
+
+#while test "$endofsession" != "n"
+#	do
+	echo "pokeexec:  Executing test case $counter."
+
+	if test "$linepars" = "true"
+	then
+		if test "$keyboard" = "true"
+		then
+			# there is keyboard input and parameters input
+
+			echo 'pokeexec: Parameter:'
+			read pars
+			echo $pars > input/input$counter.tes
+			tee keyboard/keyboard$counter.tes | $program $pars | tee output/output$counter.tes
+
+		else # keyboard is false
+			# There is no input from keyboard.
+
+			echo 'pokeexec: Parameter:'
+			read pars
+			echo $pars > input/input$counter.tes
+			$program $pars | tee output/output$counter.tes
+		fi
+	else # linepars is false
+	# There is no input from line command invocation
+
+		if test "$keyboard" = "true"
+		then
+			# There is input from keyboard but not from line command
+			
+			tee keyboard/keyboard$counter.tes | $program | tee output/output$counter.tes
+		else
+			# Only execute program and save output
+			
+			$program | tee output/output$counter.tes
+		fi
+	fi
+	echo
+        echo =========================
+
+	# save the path.tes file
+
+	for mod in  `echo $funcs | sed 's/-f//g'`
+	do
+	if test -f $mod/path.tes
+	then
+		cp $mod/path.tes $mod/path$counter.tes
+                rm -f $mod/path.tes   ####### Silvia's change #####
+	else
+		echo "pokeexec: It was not create te file \"$mod/path.tes\";"
+		echo "              \"$program\" probably the function \"$mod\" was not executed !"
+		echo " 0" > $mod/path$counter.tes
+#		exit 2
+	fi
+	done
+
+	# increment counter
+#	counter=`expr $counter + 1`
+
+#	echo ""
+#	echo 'pokeexec: Voce quer continuar a executar casos de teste? (s/n)[s]'
+#	read endofsession
+#	#echo "$endofsession"
+#	done 
+
+#echo "pokeexec mensagem: Fim da Execucao de Casos de Teste para o \"$program\""
+echo "pokeexec: OK"
+echo =========================
+echo ""
+echo "Type <RETURN> to finish test case submission..."
+read any

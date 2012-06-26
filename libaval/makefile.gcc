@@ -1,0 +1,95 @@
+
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+# makefile		
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#	Makefile for generating syncaval files
+#
+# This files allow the evaluation of a test case during its execution. 
+# Basically they call the aval program as a library.
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+#	Author: Marcos L. Chaim
+#
+#	Date: 2000/04/13
+#
+#
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+
+HOME=/home/mchaim/projetos
+
+FNTS =  $(HOME)/newpoke
+MODL = 
+SRCS = libaval0.c libaval1.c libaval2.c libaval3.c libaval4.c \
+       libmainava2.c libitoa.c
+OBJS = $(ARCHIT)/libaval0.o $(ARCHIT)/libaval1.o $(ARCHIT)/libaval2.o \
+       $(ARCHIT)/libaval3.o $(ARCHIT)/libaval4.o $(ARCHIT)/libmainava2.o \
+       $(ARCHIT)/libitoa.o
+DOTH =
+
+#
+# Library with functions implemented for POKE-TOOL
+#
+
+#
+# POKE-TOOL library generation
+#
+
+LIBAVAL = $(FNTS)/libaval/$(ARCHIT)/libaval.a
+LIBNEWPOKE = $(FNTS)/lib/libnewpoke.a
+
+# 
+# Commom Directory of includes
+#
+
+INCLTRAD = $(FNTS)/include
+
+#
+# Flags used for compilation
+#
+
+GDB =
+GDB_TSB =
+CC = gcc
+CFLAGS = -c -ansi $(GDB) $(GDB_TSB) -I$(INCLTRAD) 
+LANG = -DMSGPORT
+
+libaval: $(OBJS) # $(LIBAVAL)
+	ar rv $(LIBAVAL) $(OBJS)
+	ranlib $(LIBAVAL)
+
+syncaval: $(OBJS) $(ARCHIT)/syncaval.o $(LIBAVAL) $(LIBNEWPOKE)
+	$(CC) $(ARCHIT)/syncaval.o $(LIBAVAL) $(LIBNEWPOKE) -o syncaval
+
+syncaval-Sort: $(OBJS) $(ARCHIT)/syncaval-Sort.o $(LIBAVAL) $(LIBNEWPOKE)
+	$(CC) $(ARCHIT)/syncaval-Sort.o $(LIBAVAL) $(LIBNEWPOKE) -o syncaval-Sort
+	cp syncaval-Sort $(FNTS)/bin
+	
+$(ARCHIT)/syncaval-Sort.o: syncaval-Sort.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) syncaval-Sort.c -o $(ARCHIT)/syncaval-Sort.o
+
+$(ARCHIT)/syncaval.o: syncaval.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) syncaval.c -o $(ARCHIT)/syncaval.o
+
+$(ARCHIT)/libaval0.o: libaval0.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) libaval0.c -o $(ARCHIT)/libaval0.o
+
+$(ARCHIT)/libaval1.o: libaval1.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) libaval1.c -o $(ARCHIT)/libaval1.o
+
+$(ARCHIT)/libaval2.o: libaval2.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) libaval2.c -o $(ARCHIT)/libaval2.o
+
+$(ARCHIT)/libaval3.o: libaval3.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) libaval3.c -o $(ARCHIT)/libaval3.o
+
+$(ARCHIT)/libaval4.o: libaval4.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) libaval4.c -o $(ARCHIT)/libaval4.o
+
+$(ARCHIT)/libmainava2.o: libmainava2.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) libmainava2.c -o $(ARCHIT)/libmainava2.o
+
+$(ARCHIT)/libitoa.o: libitoa.c $(INCLTRAD)/newpokelib.h 
+	$(CC) $(CFLAGS) libitoa.c -o $(ARCHIT)/libitoa.o

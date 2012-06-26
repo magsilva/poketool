@@ -1,0 +1,87 @@
+
+Pessoal,
+
+Estou enviando para voces o arquivo com a descricao do passeio pela
+poketool.
+
+
+Abracos,
+
+Chaim
+
+
+Um "Tour pela poketool:
+----------------------
+
+# Passo 1: Analise estatica usando a poketool
+
+>> newpoketool cmdline.c -L4 -cdf-pu -f_todas_
+
+# Passo 2: Gerar executavel
+
+>> gcc testeprog.c -o testeprog
+
+# Passo 3: Rodar casos de teste
+
+# Para encontrar as funcoes utilize o seguinte comando:
+
+>> ls -l | grep ^d | awk '{printf " -f%s ", $9}' 
+
+# Para jogar em um arquivo
+
+>> ls -l | grep ^d | awk '{printf " -f%s ", $9}' > tmp
+
+# Utilizar o pokeexec para gerar os arquivos de caminhos:
+
+pokeexec testeprog -l -fcode_string -fis_str_keyword -fmain -fprint_aufgabe -fprint_dateien -fprocess_switches -fusage
+
+# Obs: Nos diretorios das funcoes sao gerados arquivos path?.tes com os caminhos executados. Normalmente, ele sao compridos e tem o formato path?.tes.Z
+
+# Foram rodados tres casos de teste. Para avaliar o criterio todos arcos para a funcao code_string utilize o comando
+
+>> newpokeaval -dcode_string -arcs 1 to 3
+
+# Para executar a avaliacao em "batch":
+
+Obter os nomes das funcoes sem o "-f" inicial:
+>> ls -l | grep ^d | awk '{printf " %s ", $9}'
+
+# Mudar para o Bourne shell:
+>> sh
+
+# inclue os comandos abaixo
+
+$ for v in  code_string  input  is_str_keyword  main  output  print_aufgabe  print_dateien  process_switches  usage
+do
+ newpokeaval -d$v -arcs 1 to 3
+done
+
+# Para voltar para o C shell 
+
+$ exit
+
+# Para olhar os resultados da funcao "main"
+# Mudar para o diretorio da funcao: 
+
+>> cd main
+
+# Para visualizar os arcos executados:
+	
+>> more exec_arc.tes
+
+# Para visualizar os arcos *nao* executados:
+
+>> more arcoutput.tes
+
+# Para os demais criterios, os arquivos de resultados executados sao:
+
+ # todos usos: exec_uses.tes
+ # todos potencial usos: exec_pu.tes
+
+# Para os demais criterios, os arquivos de resultados * nao * executados sao:
+
+ # todos usos: usesoutput.tes
+ # todos potencial usos: puoutput.tes
+
+
+

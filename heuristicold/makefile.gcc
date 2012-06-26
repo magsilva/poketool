@@ -1,0 +1,21 @@
+#
+# Diretorio com os arquivos .h
+#
+
+# Compilacao UNIX
+
+
+INCL = $(DIRPOKE)/include
+LIBPOKE = ${DIRPOKE}/lib/libnewpoke.a
+
+GDB=
+
+heuristic: $(ARCH)/heuristic2.o $(ARCH)/itoa.o heuristic.c $(INCL)/newpokelib.h
+	gcc $(GDB) heuristic.c $(ARCH)/heuristic2.o $(ARCH)/itoa.o -I$(INCL) $(LIBPOKE) -o heuristic
+	cp heuristic $(DIRPOKE)/bin
+
+$(ARCH)/heuristic2.o: heuristic2.c $(INCL)/haval.h
+	gcc -c $(GDB) heuristic2.c -I$(INCL) -o $(ARCH)/heuristic2.o
+
+$(ARCH)/itoa.o: itoa.c 
+	gcc -c $(GDB) itoa.c -I$(INCL) -o $(ARCH)/itoa.o

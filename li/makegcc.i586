@@ -1,0 +1,51 @@
+# ----------------------------------------------------------------------------
+# %W%	%Y%	%E%
+#
+# %Q%
+#
+# Data da ultima alteracao:
+#
+#		%E% %U%
+#
+# ----------------------------------------------------------------------------
+#
+
+GDB = # -ggdb
+M_DBG =  #-DMEM_DEBUG	# inclui  mshell
+
+ARCH = $(ARCHIT)/
+
+#CFLAGS = -c $(GDB) $(M_DBG) -DANSI_C \
+	 #-I$(GCC_INCLUDE_DIR) \
+	  #-I../include \
+	  #-Wmissing-prototypes \
+	  #-Wcomments \
+	 
+CFLAGS = $(GDB) $(M_DBG) -DANSI_C -I../include -c $(@F:%.o=%.c) -o $(@)
+
+# Flag para gerar executavel disponivel para usuarios extra-grupo
+
+
+LDFLAGS =
+BIN = ${HOME}/newpoke/bin
+CC = gcc 
+
+#
+# ----------------------------------------------------------------------------
+# Targets comuns no ambiente UNIX.
+# ----------------------------------------------------------------------------
+#
+faz:			fazmodulo
+
+$(OBJS):		$$(@F:.o=.c)
+			$(CC) $(CFLAGS)
+
+fontes:			$(FNTS)
+$(FNTS):
+			$(GET) $(REL) $@
+
+limpa:
+			-$(DEL) $(ARCH)*.o
+			-$(DEL) $(ARCH)*.a
+			-sccs clean
+

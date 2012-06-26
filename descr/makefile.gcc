@@ -1,0 +1,139 @@
+##########################################################################
+#									 #
+#        Makefile para a geracao do modulo pokernel da POKE-TOOL 	 #
+#									 #
+#	Autor: Marcos L. Chaim						 #
+#	Data : 30/04/93							 #
+#	%I%	%Y%	%E%	%U%                                      #
+#									 #
+##########################################################################
+
+#
+# Arquitetura e compilador
+#
+# Obs.: eh necessario criar um diretorio com o nome da arquitetura,
+#	pois eh onde serao salvados os arquivos objetos.
+#
+
+
+#
+# Diretorios
+#
+
+# Diretorio com os arquivos .h
+INCL=$(DIRPOKE)/include
+
+# Diretorio com os binarios
+BIN=$(DIRPOKE)/bin
+
+# Localizacao da biblioteca geral da poketool
+
+LIBPOKE = $(DIRPOKE)/lib/libnewpoke.a
+
+#
+# Arquivos executaveis
+#
+
+E =
+
+MODINT =newdescr$(E)
+MODEXT =newdescr$(E)
+
+#
+# Arquivos Objeto
+#
+
+O = o
+
+#
+# Flags de compilacao & link-edicao
+#
+
+CFLAGS = $(GDB) -DANSI_C -I$(INCL) -c
+LFLAGS = -o
+
+#
+# Comandos para gerar executavel e copiar de arquivos 
+#
+
+COPY = cp
+
+#
+# Comandos para gerar executavel e copiar de arquivos 
+#
+
+OBJS =  $(ARCH)/errdescr.$(O) $(ARCH)/pduca11.$(O)  $(ARCH)/pducam2.$(O)  \
+        $(ARCH)/pducam3.$(O)  $(ARCH)/pducam5.$(O)  $(ARCH)/pduca61.$(O)  \
+        $(ARCH)/pducam7.$(O)  $(ARCH)/inigrf.$(O)   $(ARCH)/ins_elem.$(O) \
+        $(ARCH)/atr_conj.$(O) $(ARCH)/det_pred.$(O) $(ARCH)/uniao1.$(O)   \
+        $(ARCH)/cal_dom2.$(O) $(ARCH)/cal_prim.$(O) $(ARCH)/criagdef.$(O) \
+        $(ARCH)/descr.$(O)    $(ARCH)/alluses.$(O)
+
+newdescr: $(OBJS) $(LIBPOKE)
+	$(CC) $(OBJS) $(LIBPOKE) $(LFLAGS) newdescr$(E)
+	$(COPY) $(MODINT) $(BIN)
+
+$(ARCH)/errdescr.$(O): $(INCL)/util.h  $(INCL)/hrotsem.h errdescr.c
+	$(CC) $(CFLAGS) errdescr.c -o $(ARCH)/errdescr.$(O)
+
+$(ARCH)/pduca11.$(O): $(INCL)/util.h $(INCL)/hrotsem.h $(INCL)/hpducam.h \
+$(INCL)/header.h pduca11.c
+	$(CC) $(CFLAGS) pduca11.c -o $(ARCH)/pduca11.$(O)
+
+$(ARCH)/pducam2.$(O): $(INCL)/util.h $(INCL)/hrotsem.h $(INCL)/hpducam.h \
+$(INCL)/header.h pducam2.c
+	$(CC) $(CFLAGS) pducam2.c -o $(ARCH)/pducam2.$(O)
+
+$(ARCH)/pducam3.$(O): $(INCL)/util.h $(INCL)/hrotsem.h $(INCL)/hpducam.h \
+$(INCL)/header.h pducam3.c
+	$(CC) $(CFLAGS) pducam3.c -o $(ARCH)/pducam3.$(O)
+
+$(ARCH)/pducam5.$(O): $(INCL)/util.h $(INCL)/hrotsem.h $(INCL)/hpducam.h \
+$(INCL)/header.h pducam5.c
+	$(CC) $(CFLAGS) pducam5.c -o $(ARCH)/pducam5.$(O)
+
+$(ARCH)/pduca61.$(O): $(INCL)/util.h  $(INCL)/hrotsem.h $(INCL)/hpducam.h \
+$(INCL)/header.h pduca61.c
+	$(CC) $(CFLAGS) pduca61.c -o $(ARCH)/pduca61.$(O)
+
+$(ARCH)/pducam7.$(O): $(INCL)/util.h $(INCL)/hrotsem.h $(INCL)/hpducam.h \
+$(INCL)/header.h pducam7.c
+	$(CC) $(CFLAGS) pducam7.c -o $(ARCH)/pducam7.$(O)
+
+$(ARCH)/inigrf.$(O): $(INCL)/util.h $(INCL)/header.h $(INCL)/hrotsem.h inigrf.c
+	$(CC) $(CFLAGS) inigrf.c -o $(ARCH)/inigrf.$(O)
+
+$(ARCH)/ins_elem.$(O): $(INCL)/util.h $(INCL)/header.h $(INCL)/hrotsem.h \
+ins_elem.c
+	$(CC) $(CFLAGS) ins_elem.c -o $(ARCH)/ins_elem.$(O)
+
+$(ARCH)/atr_conj.$(O): $(INCL)/util.h  $(INCL)/header.h $(INCL)/hrotsem.h \
+atr_conj.c
+	$(CC) $(CFLAGS) atr_conj.c -o $(ARCH)/atr_conj.$(O)
+
+$(ARCH)/det_pred.$(O): $(INCL)/util.h $(INCL)/header.h $(INCL)/hrotsem.h \
+det_pred.c
+	$(CC) $(CFLAGS) det_pred.c -o $(ARCH)/det_pred.$(O)
+
+$(ARCH)/uniao1.$(O): $(INCL)/util.h $(INCL)/header.h $(INCL)/hrotsem.h uniao1.c
+	$(CC) $(CFLAGS) uniao1.c -o $(ARCH)/uniao1.$(O)
+
+$(ARCH)/cal_dom2.$(O): $(INCL)/util.h $(INCL)/header.h $(INCL)/hrotsem.h \
+cal_dom2.c
+	$(CC) $(CFLAGS) cal_dom2.c -o $(ARCH)/cal_dom2.$(O)
+
+$(ARCH)/cal_prim.$(O): $(INCL)/util.h  $(INCL)/header.h $(INCL)/hrotsem.h \
+cal_prim.c
+	$(CC) $(CFLAGS) cal_prim.c -o $(ARCH)/cal_prim.$(O)
+
+$(ARCH)/criagdef.$(O): $(INCL)/util.h  $(INCL)/hrotsem.h criagdef.c
+	$(CC) $(CFLAGS) criagdef.c -o $(ARCH)/criagdef.$(O)
+
+$(ARCH)/descr.$(O): $(INCL)/util.h $(INCL)/headerli.h $(INCL)/tabelas.h \
+$(INCL)/hparserg.h $(INCL)/hmonitor.h descr.c
+	$(CC) $(CFLAGS) descr.c -o $(ARCH)/descr.$(O)
+
+$(ARCH)/alluses.$(O): $(INCL)/util.h $(INCL)/headerli.h $(INCL)/tabelas.h \
+$(INCL)/hparserg.h $(INCL)/hmonitor.h $(INCL)/newpokelib.h alluses.c
+	$(CC) $(CFLAGS) alluses.c -o $(ARCH)/alluses.$(O)
+

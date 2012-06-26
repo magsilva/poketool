@@ -1,0 +1,50 @@
+# ----------------------------------------------------------------------------
+# @(#)make.pc	
+#
+# 
+#
+# Data da ultima alteracao:
+#
+#		
+#
+# ----------------------------------------------------------------------------
+#
+E = 
+O = o
+ARCH =${ARCHIT}/
+COPY = cp 
+DEL = rm 
+BIN = ${HOME}/newpoke/bin
+LIBS =  -L. -lker -L/usr/lib -lm -lc
+
+#
+# ----------------------------------------------------------------------------
+# Comandos para gerar executavel.
+# ----------------------------------------------------------------------------
+#
+
+#COMF1 = $(LIB) libker.a $(OBJF1) 
+#COMF2 = $(LIB) libker.a $(OBJF2) 
+#COMF3 = $(LIB) libker.a $(OBJF3)
+#COMF4 = $(LIB) libker.a $(OBJF4)
+#COMF5 = ranlib libker.a 
+#COMF6 = $(LINK) $(LDFLAGS) $(ARCH)main.$(O) $(LIBS) -o newpokernel
+#COMF7 = $(DEL) libker.a
+#COMF8 = coff2exe -s /djgpp/bin/go32.exe newpokernel 
+COMF9 =$(COPY) $(MODEXT) $(BIN)#/$(MODINT) 
+#COMF10= $(DEL) $(MODEXT)
+COMF12= $(COPY) tabsin.c   $(POKETABS)
+COMF13= $(COPY) tabtrans.c      $(POKETABS)
+COMF14= $(COPY) tabchave.c      $(POKETABS)
+COMF15= $(COPY) tipos.c      $(POKETABS)
+
+#
+# ----------------------------------------------------------------------------
+# Macros contendo arquivos a serem incluidos na lib.
+# ----------------------------------------------------------------------------
+#
+
+OBJF1 =	$(ARCH)parserl4.$(O) $(ARCH)parserg1.$(O) $(ARCH)parserg2.$(O)  $(ARCH)analex3.$(O) $(ARCH)leparser.$(O)
+OBJF2 =	$(ARCH)carrega2.$(O) $(ARCH)pesqtab2.$(O) $(ARCH)simbolo2.$(O) $(ARCH)acsem2.$(O) $(ARCH)rotsem3.$(O)
+OBJF3 = $(ARCH)trataext.$(O) $(ARCH)monitor1.$(O) $(ARCH)monitor2.$(O) $(ARCH)salvagrf.$(O) $(ARCH)getfuncs.$(O)
+OBJF4 = $(ARCH)inigrf.$(O) $(ARCH)ins_elem.$(O) $(ARCH)atr_conj.$(O) $(ARCH)pokelib7.$(O) $(ARCH)pokelib8.$(O) $(ARCH)pokelib9.$(O) $(ARCH)pokelib1.$(O) $(ARCH)teste.$(O)

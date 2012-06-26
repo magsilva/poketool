@@ -1,0 +1,49 @@
+# ----------------------------------------------------------------------------
+# @(#)make.pc	
+#
+# 
+#
+# Data da ultima alteracao:
+#
+#		
+#
+# ----------------------------------------------------------------------------
+#
+E = .exe
+O = o
+ARCH =
+COPY = copy 
+DEL = del 
+BIN = c:\users\chaim\poketool\bin
+LIBS =  -L. -lli -L\usr\lib -lm -lc
+
+#
+# ----------------------------------------------------------------------------
+# Comandos para gerar executavel.
+# ----------------------------------------------------------------------------
+#
+
+COMF1 = $(LIB) libli.a $(OBJF1) 
+COMF2 = $(LIB) libli.a $(OBJF2) 
+COMF3 = $(LIB) libli.a $(OBJF3)
+COMF4 = ranlib libli.a 
+COMF5 = $(LINK) $(LDFLAGS) li.$O $(LIBS) -o li
+COMF6 = del libli.a
+COMF7 = coff2exe -s /djgpp/bin/go32.exe li 
+COMF8 = $(COPY) $(MODEXT) $(BIN)\$(MODINT)
+#COMF9 = $(DEL) $(MODEXT)
+#COMF10= $(COPY) li$(E) $(BIN) 
+COMF12= $(COPY) tabsin.c   $(LITABS)
+COMF13= $(COPY) tabtrans.c $(LITABS)
+COMF14= $(COPY) tabchave.c $(LITABS)
+COMF15= $(COPY) tipos.c    $(LITABS)
+
+#
+# ----------------------------------------------------------------------------
+# Macros contendo arquivos a serem incluidos na lib.
+# ----------------------------------------------------------------------------
+#
+
+OBJF1 =	pokelib7.$(O) gravali.$(O) li.$(O) analex3.$(O)
+OBJF2 =	carrega2.$(O) pesqtab2.$(O) simbolo2.$(O) acsem2.$(O)
+OBJF3 = parserg1.$(O) parserg2.$(O) leparser.$(O) rotsem.$(O) error.$(O)

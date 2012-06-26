@@ -1,0 +1,195 @@
+#!/bin/sh
+
+############################################################################
+#									   #
+# pokebatch-par -- Shell file to invoke several test cases in batch.       #
+#									   #
+#									   #
+#									   #
+############################################################################
+
+echo 'pokebatch-par - execucao em batch de casos de testes'
+
+case $# in
+
+0) echo 'Uso: pokebatch-par <nome do executavel> <dir casos de teste>  x y [+l|-l] [+t|-t] -f<nome da funcao> [-f<nome da funcao>]'  1>&2  ;
+   exit 2;;
+1) echo 'pokebatch-par Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+2) echo 'pokebatch-par Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+3) echo 'pokebatch-par Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+4) echo 'pokebatch-par Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+*) nome_exe=$1; dir_tcase=$2; beg=$3; end=`expr $4 + 1`; lastcase=$4;
+
+esac
+
+# Get functions name 
+
+shift
+shift
+shift
+shift
+
+while test "$1" != ""
+do
+        case $1 in
+        -l) linepars="$linepars $1";;
+        +l) linepars="$linepars $1";;
+        -t) linepars="$linepars $1";;
+        +t) linepars="$linepars $1";;
+         *) funcs="$funcs $1"
+        esac
+        shift
+done
+
+# First test if there is executable
+
+if  test -f $nome_exe
+then
+	:
+else
+	echo "pokebatch-par: Erro: Nao encontrei o executavel em \"$nome_exe\""
+	exit 2
+fi
+
+if test -d ./output
+then
+	echo "pokebatch-par: Msg: diretorio de saidas ja' existe"
+else
+	echo "pokebatch-par: Msg: Criando o diretorio de saidas"
+	mkdir ./output
+fi
+	
+#echo $dir_exe $dir_tcase $beg $end
+
+#echo 'passei aqui'
+
+inicio=$beg
+
+
+while test "$beg" != "$end"
+do
+
+	echo ''
+	echo "		**** Executando Caso de Teste Numero $beg ****"
+	echo ''
+
+	if cat $dir_tcase/input$beg | pokeaux-par $nome_exe $linepars -r$beg $funcs #> $dir_exe/output/output$beg
+	then
+		:
+else
+	   echo "pokebatch: Erro: Nao consegui executar caso de teste $beg"
+	   beg=`expr $beg + 1`
+	   continue
+	fi
+
+	if test -f aval$inicio-$lastcase.tar
+	then
+	  :
+	else
+	  touch aval$inicio-$lastcase.tar
+	fi
+	
+        for mod in  `echo $funcs | sed 's/-f//g'`
+	do
+	if test -f $mod/pdufreq$beg.tes
+	then
+	    echo "Case $beg:" >> $mod/pducases.tes
+	    awk '{printf("%d ",$1)} END {printf("\n")}' $mod/pdufreq$beg.tes >> $mod/pducases.tes     
+	fi
+
+	if test -f $mod/pufreq$beg.tes
+	then
+	    echo "Case $beg:" >> $mod/pucases.tes
+	    awk '{printf("%d ",$1)} END {printf("\n")}' $mod/pufreq$beg.tes >> $mod/pucases.tes
+	fi
+
+	if test -f $mod/pudufreq$beg.tes
+	then
+	    echo "Case $beg:" >> $mod/puducases.tes
+	    awk '{printf("%d ",$1)} END {printf("\n")}' $mod/pudufreq$beg.tes >> $mod/puducases.tes
+    
+	fi
+	
+	if test -f $mod/nosfreq$beg.tes
+	then
+	    echo "Case $beg:" >> $mod/noscases.tes
+	    awk '{printf("%d ",$1)} END {printf("\n")}' $mod/nosfreq$beg.tes >> $mod/noscases.tes
+	fi
+	
+	if test -f $mod/arcfreq$beg.tes
+	then
+	    echo "Case $beg:" >> $mod/arccases.tes
+	    awk '{printf("%d ",$1)} END {printf("\n")}' $mod/arcfreq$beg.tes >> $mod/arccases.tes
+	fi
+
+	if test -f $mod/pusesfreq$beg.tes
+	then
+	    echo "Case $beg:" >> $mod/pusescases.tes
+	    awk '{printf("%d ",$1)} END {printf("\n")}' $mod/pusesfreq$beg.tes >> $mod/pusescases.tes
+
+	fi
+	  
+	if test -f $mod/usesfreq$beg.tes
+	then
+	     echo "Case $beg:" >> $mod/usescases.tes
+             awk '{printf("%d ",$1)} END {printf("\n")}' $mod/usesfreq$beg.tes>> $mod/usescases.tes
+	fi
+	
+	if test -f $mod/dupathsfreq$beg.tes
+	then
+	    echo "Case $beg:" >> $mod/dupathscases.tes
+	    awk '{printf("%d ",$1)} END {printf("\n")}' $mod/dupathsfreq$beg.tes >> $mod/dupathscases.tes
+	fi
+	  
+	if tar rf aval$inicio-$lastcase.tar $mod/*freq$beg.tes
+	then
+	     rm -f $mod/*freq$beg.tes
+	fi
+	done
+	
+	beg=`expr $beg + 1`
+done
+
+# Gera arquivo cases
+
+touch cases$inicio-$lastcase.tar
+
+for mod in  `echo $funcs | sed 's/-f//g'`
+do
+	if tar rf cases$inicio-$lastcase.tar $mod/*cases.tes
+	then	
+	     rm -f $mod/*cases.tes
+	fi
+done
+
+if compress aval$inicio-$lastcase.tar
+then
+   :
+else
+   echo "Nao consegui compactar aval$inicio-$lastcase.tar"
+fi
+
+if compress cases$inicio-$lastcase.tar
+then
+   :
+else
+   echo "Nao consegui compactar cases$inicio-$lastcase.tar"
+fi
+
+# Para garantir o termino de consumer
+
+rm -f cur-exec
+rm -f path.tes
+rm -f end-test-case
+
+exit 0
+
+
+
+
+
+
+
+
+
+

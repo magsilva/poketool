@@ -1,0 +1,15 @@
+#!/bin/sh
+
+nome=`echo $1| sed 's/.c//'`
+
+echo $1
+echo $2
+if gcc -E  -DE7 -DE8 -DE10 -DE12 -DE14 -DE16 -DE17 -DE18 -DE19 -DE20 -DE21 -DE22 -DE23 -DE24 -DE25 -DE27 -DE29 -DE33 $1 -o t_$1
+then
+	
+	echo "Gerei t_$1"
+	exit 0
+else
+	echo " Nao consegui rodar o preprocessador da linguagem C"
+	exit 1
+fi

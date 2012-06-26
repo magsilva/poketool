@@ -1,0 +1,176 @@
+##########################################################################
+#									 #
+#        Makefile para a geracao do modulo pokernel da POKE-TOOL 	 #
+#									 #
+#	Autor: Marcos L. Chaim						 #
+#	Data : 30/04/93							 #
+#	%I%	%Y%	%E%	%U%                                      #
+##########################################################################
+
+#
+# Arquitetura e compilador
+#
+# Obs.: eh necessario criar um diretorio com o nome da arquietura,
+#	pois eh onde serao salvados os arquivos objetos.
+#
+
+#
+# Diretorios
+#
+
+# Diretorio com os arquivos .h
+INCL=$(DIRPOKE)/include
+
+# Diretorio com os binarios
+BIN=$(DIRPOKE)/bin
+
+#
+#Idiossincrasias: 
+#
+# 1) o pokernel utiliza algumas funcoes do modulo descr
+#    que nao estao incluidas como parte da biblioteca
+#    geral da poketool, por isso, eh necessario uma macro
+#    que aponta para este diretorio e incluir os arquivos 
+#    com estas funcoes nos conjunto de objetos do pokernel.
+#
+
+
+# Diretorio do modulo descr
+DESCR = $(DIRPOKE)/descr/
+
+# Localizacao da biblioteca geral da poketool
+
+LIBPOKE = $(DIRPOKE)/lib/libnewpoke.a
+
+#
+# Arquivos executaveis
+#
+
+MODINT =newpokernel$(E)
+MODEXT =newpokernel$(E)
+
+MODLS = parserl4.c parserg1.c parserg2.c leparser.c analex3.c carrega2.c \
+	acsem2.c simbolo2.c pesqtab2.c rotsem3.c trataext.c monitor1.c   \
+        monitor2.c salvagrf.c getfuncs.c $(DESCR)inigrf.c $(DESCR)ins_elem.c \
+	$(DESCR)atr_conj.c  main.c
+	
+#
+# Arquivos Objeto
+#
+
+O = o
+
+OBJS =  $(ARCH)/parserl4.$(O) $(ARCH)/parserg1.$(O) $(ARCH)/parserg2.$(O) \
+        $(ARCH)/leparser.$(O) $(ARCH)/analex3.$(O) $(ARCH)/carrega2.$(O)  \
+	$(ARCH)/acsem2.$(O) $(ARCH)/simbolo2.$(O) $(ARCH)/pesqtab2.$(O)   \
+	$(ARCH)/rotsem3.$(O) $(ARCH)/trataext.$(O) $(ARCH)/monitor1.$(O)  \
+	$(ARCH)/monitor2.$(O) $(ARCH)/salvagrf.$(O) $(ARCH)/getfuncs.$(O) \
+	$(ARCH)/inigrf.$(O) $(ARCH)/ins_elem.$(O) $(ARCH)/atr_conj.$(O)   \
+	$(ARCH)/main.$(O) #$(ARCH)/teste.$(O)  $(ARCH)/pokelib7.$(O) $(ARCH)/pokelib1.$(O)
+
+#
+# Tabelas do modulo li e diretorio para copia das tabelas
+#
+
+#TABS =  parserot.c chave.c trans.c
+TABS = tabtrans.c tabsin.c tabchave.c tipos.c 
+POKETABS= poketabs
+
+#
+# Flags de compilacao
+#
+
+CFLAGS = $(GDB) $(DEBUG) -DANSI_C -I$(INCL) -c $(@F:%.o=%.c) -o $(@)
+PFLAGS = $(GDB) -DANSI_C -I$(INCL) -c
+
+#
+# Comandos para gerar executavel e copiar de arquivos 
+#
+
+COPY = cp
+COMF1 = $(COPY) $(MODEXT) $(BIN)/$(MODINT)  
+COMF2 = $(COPY) $(TABS)  $(BIN)/$(POKETABS)
+
+
+fazmodulo:	newpokernel$(E)
+
+newpokernel$(E):	$(OBJS) $(LIBPOKE) $(TABS)
+			$(CC) $(OBJS) -lc $(LIBPOKE) -o newpokernel$(E)
+			$(COMF1)
+			$(COMF2)
+
+$(ARCH)/parserl4.$(O): parserl4.c $(INCL)/util.h $(INCL)/headerli.h $(INCL)/tabelas.h $(INCL)/hparserg.h $(INCL)/hmonitor.h $(INCL)/hrotsem.h
+	$(CC)  $(CFLAGS)
+	
+$(ARCH)/parserg1.$(O): parserg1.c $(INCL)/util.h $(INCL)/hparserg.h \
+		      $(INCL)/tabelas.h $(INCL)/hrotsem.h $(INCL)/headerli.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/parserg2.$(O): parserg2.c  $(INCL)/util.h  $(INCL)/hparserg.h \
+		      $(INCL)/headerli.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/leparser.$(O): leparser.c $(INCL)/util.h $(INCL)/hparserg.h \
+		      $(INCL)/tabelas.h $(INCL)/headerli.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/analex3.$(O): analex3.c $(INCL)/util.h $(INCL)/tabelas.h \
+		     $(INCL)/headerli.h $(INCL)/hparserg.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/carrega2.$(O): carrega2.c $(INCL)/util.h $(INCL)/tabelas.h \
+		      $(INCL)/hparserg.h $(INCL)/header.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/acsem2.$(O): acsem2.c $(INCL)/util.h $(INCL)/tabelas.h
+	$(CC)  $(CFLAGS)
+
+# Ate' aqui esta ok!
+
+$(ARCH)/simbolo2.$(O): simbolo2.c $(INCL)/util.h $(INCL)/tabelas.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/pesqtab2.$(O): pesqtab2.c $(INCL)/util.h  $(INCL)/tabelas.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/rotsem3.$(O): rotsem3.c $(INCL)/util.h  $(INCL)/hrotsem.h $(INCL)/tabelas.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/trataext.$(O): trataext.c $(INCL)/util.h  $(INCL)/hrotsem.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/monitor1.$(O): monitor1.c $(INCL)/util.h $(INCL)/hmonitor.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/monitor2.$(O): monitor2.c  $(INCL)/util.h $(INCL)/hmonitor.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/getfuncs.$(O): getfuncs.c  $(INCL)/util.h $(INCL)/headerli.h 
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/salvagrf.$(O): salvagrf.c  $(INCL)/util.h $(INCL)/hrotsem.h 
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/main.$(O): main.c $(INCL)/util.h $(INCL)/headerli.h $(INCL)/tabelas.h \
+		  $(INCL)/hparserg.h $(INCL)/hmonitor.h $(INCL)/hli.h
+	$(CC)  $(CFLAGS)
+
+$(ARCH)/inigrf.$(O):
+	$(CC)  $(PFLAGS) ../descr/inigrf.c -o $(ARCH)/inigrf.$(O)
+
+$(ARCH)/ins_elem.$(O):
+	$(CC)  $(PFLAGS) ../descr/ins_elem.c -o $(ARCH)/ins_elem.$(O)
+
+$(ARCH)/atr_conj.$(O): 
+	$(CC)  $(PFLAGS) ../descr/atr_conj.c -o $(ARCH)/atr_conj.$(O)
+
+$(ARCH)/teste.$(O): teste.c
+	$(CC)  $(CFLAGS)
+
+#
+# Fim arquivo makefile.gcc
+#
+
+
+
+

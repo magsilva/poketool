@@ -1,0 +1,146 @@
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+# MAKEFILE para a geracao do modulo LI -- POKE-TOOL
+#
+# %W%   %Y%     %E%
+#
+# %Q%
+#
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+#  Autor: Marcos L. Chaim
+#  Data:  92/03/21
+#
+# Data da ultima alteracao:
+#
+#               %E% %U%
+#
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+#
+# Arquitetura e compilador
+#
+# Obs.: eh necessario criar um diretorio com o nome da arquietura,
+#	pois eh onde serao salvados os arquivos objetos.
+#
+
+GDB= 
+DEBUG= 
+
+#
+# Diretorios
+#
+
+# Diretorio com os arquivos .h
+INCL=$(DIRPOKE)/include
+
+# Diretorio com os binarios
+BIN=$(DIRPOKE)/bin
+
+# 
+# Arquivos Fonte
+#
+
+MODLS = pokelib7.c  gravali.c li.c analex3.c carrega2.c pesqtab2.c \
+	simbolo2.c rotsem.c parserg1.c parserg2.c leparser.c error.c acsem2.c 
+
+DOTH = $(INCL)/util.h $(INCL)/hparserg.h $(INCL)/tabelasli.h $(INCL)/hli.h
+
+#
+# Arquivos executaveis
+#
+
+E =
+
+MODINT =newli$(E)
+MODEXT =newli$(E)
+
+#
+# Arquivos Objeto
+#
+
+O = o
+
+OBJS = $(ARCH)/pokelib7.$(O) $(ARCH)/gravali.$(O) $(ARCH)/li.$(O)        \
+       $(ARCH)/analex3.$(O) $(ARCH)/carrega2.$(O) $(ARCH)/pesqtab2.$(O)  \
+       $(ARCH)/simbolo2.$(O) $(ARCH)/acsem2.$(O) $(ARCH)/parserg1.$(O)   \
+       $(ARCH)/parserg2.$(O) $(ARCH)/leparser.$(O) $(ARCH)/rotsem.$(O)   \
+       $(ARCH)/error.$(O)
+
+#
+# Tabelas do modulo li e diretorio para copia das tabelas
+#
+
+TABS = tabsin.c tabtrans.c tabchave.c tipos.c
+LITABS= litabs
+
+#
+# Flags de compilacao
+#
+
+CFLAGS = $(GDB) $(DEBUG) -DANSI_C -I$(INCL) -c $(@F:%.o=%.c) -o $(@)
+
+
+#
+# Comandos para gerar executavel e copiar de arquivos 
+#
+
+COPY = cp
+COMF1 = $(CC) $(LDFLAGS) $(OBJS) -o $(MODEXT)
+COMF2 = $(COPY) $(MODEXT) $(BIN)/$(MODINT)  
+COMF3 = $(COPY) $(TABS)  $(BIN)/$(LITABS)
+
+
+.c.o:
+	$(CC) $(GDB) $(CFLAGS) $*.c
+
+fazmodulo:	li$(E)
+
+li$(E):  $(OBJS) $(LIBV) $(LLIB)
+			$(COMF1)
+			$(COMF2)
+			$(COMF3)
+
+
+$(ARCH)/pokelib7.$(O): pokelib7.c
+	$(CC) $(CFLAGS) 
+
+$(ARCH)/gravali.$(O): $(INCL)/util.h $(INCL)/tabelasli.h gravali.c
+	$(CC) $(CFLAGS)
+
+$(ARCH)/li.$(O): $(INCL)/util.h $(INCL)/tabelasli.h $(INCL)/hparserg.h $(INCL)/hli.h li.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/analex3.$(O): $(INCL)/util.h $(INCL)/tabelasli.h $(INCL)/hparserg.h $(INCL)/hli.h analex3.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/carrega2.$(O): $(INCL)/util.h $(INCL)/tabelasli.h $(INCL)/hparserg.h $(INCL)/hli.h $(INCL)/headerli.h $(INCL)/hrotsem.h carrega2.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/pesqtab2.$(O): $(INCL)/util.h $(INCL)/tabelasli.h pesqtab2.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/simbolo2.$(O): $(INCL)/util.h $(INCL)/tabelasli.h simbolo2.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/acsem2.$(O): $(INCL)/util.h $(INCL)/hparserg.h $(INCL)/tabelasli.h $(INCL)/hli.h acsem2.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/parserg1.$(O): $(INCL)/util.h $(INCL)/hparserg.h $(INCL)/headerli.h parserg1.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/parserg2.$(O): $(INCL)/util.h $(INCL)/tabelasli.h $(INCL)/hparserg.h $(INCL)/hli.h $(INCL)/headerli.h $(INCL)/hrotsem.h parserg2.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/leparser.$(O): $(INCL)/util.h $(INCL)/hparserg.h $(INCL)/headerli.h $(INCL)/tabelasli.h leparser.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/rotsem.$(O): $(INCL)/util.h $(INCL)/tabelasli.h $(INCL)/hparserg.h $(INCL)/hli.h rotsem.c
+	 $(CC) $(CFLAGS)
+
+$(ARCH)/error.$(O): $(INCL)/util.h $(INCL)/hparserg.h $(INCL)/tabelasli.h $(INCL)/hli.h error.c
+	 $(CC) $(CFLAGS)
+
+#
+# Fim arquivo makefile.gcc
+#

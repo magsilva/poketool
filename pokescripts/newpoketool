@@ -1,0 +1,165 @@
+#!/bin/sh
+
+############################################################################
+#									   #
+# newpoketool -- Shell file to produce newpoketool's static analysis.	   #
+#									   #
+# author:  Marcos L. Chaim						   #
+# date:    1994/12/28							   #
+# version: 1.0   							   #
+#									   #
+############################################################################
+
+echo 'newpoketool - Analisador Estatico para Teste de Programas escritos em Linguagem C'
+
+case $# in
+
+0|1) echo 'Uso: newpoketool <nome do arquivo> [-L<nivel modelo de dados>] [-c<selecao de criterios>] [-I<Diretorios de Include>] [-D<defines>]  -f<funcao> [-f<funcao>]'  1>&2  ;
+    echo ""
+    echo '  -Lx (x=0,1,2,3,4,5) - indica o nivel de modelo de dados; se este parametro for omitido considera-se nivel L2' 1>&2  ;
+    echo ""
+    echo '  -c<selecao de criterios>:' 1>&2  ;
+    echo '	gfc:  todos nos e todos arcos;' 1>&2  ;
+    echo '	df:   todos nos, todos arcos, todos p-usos e todos usos;' 1>&2  ;
+    echo '	dup:  todos nos, todos arcos e todos du-caminhos;' 1>&2  ;
+    echo '	pu:   todos nos, todos arcos, todos pot-usos e todos pot-usos/du;' 1>&2  ;
+    echo '	pdu:  todos nos, todos arcos e todos pot-du-caminhos;' 1>&2  ;
+    echo '	df-pu:todos nos, todos arcos, todos p-usos, todos usos, todos pot-usos e todos pot-usos/du;' 1>&2  ;
+    echo '	parametro omitido: todos criterios.' 1>&2  ;
+   exit 2;;
+esac
+
+# Set Trap routine
+
+trap ' # Clean up intermediate files before leaving
+   if -f temp$$ then 
+	rm -f temp$$
+   fi
+   exit 3
+' 1 2 9 15
+
+# Separe file name
+
+archive=$1
+echo "Arquivo em teste: $archive"
+
+# Separe parameters
+
+shift
+
+while test "$1" != "" 
+	do
+
+	par=$1;
+	case $par in
+	-f_todas_) allfuncs="true"; funcs="-f_todas_";;
+	-I*) includes="$includes $par";;
+	-D*) defines="$defines $par";; 
+	-f*) funcs="$funcs $par";;
+	-L*) level=$par;;
+        -c*) selcrit=$par;;
+	esac
+
+	shift
+	done
+
+if test "$selcrit" != ""
+then
+	case $selcrit in
+	
+		-cdf-pu) ;;
+		-cgfc)   ;;
+		-cdup)   ;; 
+		-cpu)    ;;
+		-cpdu)   ;;
+        	-cdf)    ;;
+		*) echo 'newpoketool: Erro: selecao de criterios invalida';
+           	exit 2;;
+	esac
+else
+       selcrit=-call
+fi
+
+
+# Obtain the preprocessed file
+
+#set -x
+echo "gcc -E $archive $includes $defines -o tmp_$archive"
+if gcc -E $includes $defines $archive -o tmp_$archive 
+then
+    echo "* * $archive pre-processado * *"
+    sed '/^#/d' tmp_$archive > tmp1$$
+    mv tmp1$$ tmp_$archive
+    rm -f tmp1$$
+    archive=tmp_$archive
+    echo $archive
+else
+    echo "newpoketool erro: erro no pre-processamento $archive"
+    exit 1
+fi
+		
+# Obtain filename without extention
+
+filename=`echo $archive | sed 's/\.c//'` 
+
+
+# Get the name of the functions to be analysed by newpoketool
+
+if test "$funcs" = "" 
+then
+     echo "newpoketool erro: Parametros incorretos: funcoes ausentes"
+     exit 2;
+fi
+
+# Firts pass, clean up all file from previous invocation of newpoketool 
+
+rm -f *.nli *.li *.gfc
+
+#set value of return
+erro=0
+
+if newli -t $filename c # $includes $defines have already been included
+then   
+    if newchanomat -t $filename
+    then
+	if test "$allfuncs" = "true"
+	then
+	    # Find all function names
+	    modules=`ls *.gfc`
+	    funcs=""
+	    for v in `echo $modules| sed 's/\.gfc//g'`
+		do
+		funcs="$funcs -f$v";
+		done
+	fi
+	if newpokernel $level $filename $funcs
+	then
+	    for mod in `echo $funcs| sed 's/-f//g'`
+		do
+		echo "";
+		echo "Gerando os descritores para a funcao $mod ..."
+		rm -f ./$mod/path*.tes 
+		mv $mod.gfc ./$mod
+		if newdescr $selcrit $mod -d./$mod 
+		then
+		    echo "* * Gerados os descritores da funcao $mod * *"
+		else
+		    echo "newpoketool erro: erro na geracao dos descritores da funcao $mod"
+		exit 5
+		fi
+		done
+	else
+         echo "newpoketool erro: problemas na analise estatica de $archive"
+	 erro=6
+	fi
+    else
+         echo "newpoketool erro: problemas na geracao do grafo de fluxo de controle"
+	 erro=7
+    fi
+else
+   echo "newpoketool erro: problemas na geracao da linguagem intermediaria"
+fi
+
+rm -f tipos.tes
+
+exit $erro

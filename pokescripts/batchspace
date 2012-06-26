@@ -1,0 +1,32 @@
+#!/bin/sh
+
+for v in *.c
+do
+    nome=`echo $v| sed 's/.c//'`
+
+    if test -d $nome
+	then
+		:
+	else
+                 mkdir $nome
+    fi
+    cp $v $nome
+    cd $nome
+    if newsp  $v
+    then
+        :
+    else
+        echo "newsp: nao consegui pre-processar arquivo $v!"
+        echo "$v -- FALHOU newsp!" >> fail.log
+    fi
+    if newpoketool t_$v -f_todas_
+    then
+       echo "$v -- OK!"
+       cp testeprog.c $nome-poke.c
+    else
+       echo "$v -- FALHOU" >> fail.log
+    fi
+      
+    cd ..
+done
+ 

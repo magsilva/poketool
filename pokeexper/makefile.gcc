@@ -1,0 +1,27 @@
+#
+# Diretorio com os arquivos .h
+#
+
+# Compilacao UNIX
+
+DIRPOKE=${HOME}/newpoke
+INCL = $(DIRPOKE)/include
+LIBPOKE = ${HOME}/newpoke/lib/libnewpoke.a
+
+GDB=
+
+pokeexper: exper.o  exper2.o exper3.o exper4.o hexper.h $(INCL)/newpokelib.h
+	gcc $(GDB) exper.o exper2.o exper3.o exper4.o -lm -I$(INCL) $(DIRPOKE)/pokedebug/heuristic/itoa.o $(LIBPOKE) -o pokeexper
+	cp pokeexper $(DIRPOKE)/bin
+
+exper.o: exper.c hexper.h $(INCL)/haval.h
+	gcc -c $(GDB) exper.c -I$(INCL) -o exper.o
+
+exper2.o: exper2.c hexper.h $(INCL)/haval.h
+	gcc -c $(GDB) exper2.c -I$(INCL) -o exper2.o
+
+exper3.o: exper3.c hexper.h $(INCL)/haval.h
+	gcc -c $(GDB) exper3.c -I$(INCL) -o exper3.o
+
+exper4.o: exper4.c hexper.h $(INCL)/haval.h
+	gcc -c $(GDB) exper4.c -I$(INCL) -o exper4.o

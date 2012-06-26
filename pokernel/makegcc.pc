@@ -1,0 +1,50 @@
+# ----------------------------------------------------------------------------
+# @(#)make.pc	
+#
+# 
+#
+# Data da ultima alteracao:
+#
+#		
+#
+# ----------------------------------------------------------------------------
+#
+E = .exe
+O = o
+ARCH =
+COPY = copy 
+DEL = del 
+BIN = c:\users\chaim\poketool\bin
+LIBS =  -L. -lker -L\usr\lib -lm -lc
+
+#
+# ----------------------------------------------------------------------------
+# Comandos para gerar executavel.
+# ----------------------------------------------------------------------------
+#
+
+COMF1 = $(LIB) libker.a $(OBJF1) 
+COMF2 = $(LIB) libker.a $(OBJF2) 
+COMF3 = $(LIB) libker.a $(OBJF3)
+COMF4 = $(LIB) libker.a $(OBJF4)
+COMF5 = ranlib libker.a 
+COMF6 = $(LINK) $(LDFLAGS) main.$(O) $(LIBS) -o pokernel
+COMF7 = del libker.a
+COMF8 = coff2exe -s /djgpp/bin/go32.exe pokernel 
+COMF9 =$(COPY) $(MODEXT) $(BIN)\$(MODINT) 
+#COMF10= $(DEL) $(MODEXT)
+COMF12= $(COPY) parserot.c   $(POKETABS)
+COMF13= $(COPY) trans.c      $(POKETABS)
+COMF14= $(COPY) chave.c      $(POKETABS)
+COMF15= $(COPY) tipos.c      $(POKETABS)
+
+#
+# ----------------------------------------------------------------------------
+# Macros contendo arquivos a serem incluidos na lib.
+# ----------------------------------------------------------------------------
+#
+
+OBJF1 =	parserl4.$(O) parserg1.$(O) parserg2.$(O) leparser.$(O) analex3.$(O)
+OBJF2 =	carrega2.$(O) pesqtab2.$(O) simbolo2.$(O) acsem2.$(O) rotsem3.$(O)
+OBJF3 = trataext.$(O) monitor1.$(O) monitor2.$(O) salvagrf.$(O) getfuncs.$(O)
+OBJF4 = inigrf.$(O) ins_elem.$(O) atr_conj.$(O) pokelib7.o pokelib8.o pokelib9.o pokelib1.o

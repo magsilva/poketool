@@ -1,0 +1,39 @@
+#!/bin/sh
+
+echo 'calcnos - Gerador dos Grafos de Fluxo de Programa de um <arquivo>.c'
+echo 'calcnos - Gera os arquivos tmp_<arquivo>.li, tmp_<arquivo>.nli'
+echo '          e .gfc do <arquivo>.c'
+
+case $# in
+
+0) echo '' 
+   echo 'Uso: calcnos <arquivo>.c'  1>&2  ;
+   exit 2;;
+esac
+
+
+nome=`echo $1| sed 's/.c//'`
+
+\rm -f tmp_$1
+
+if gcc -E $1 -o tmp_$1
+then
+	echo "MSG: Pre'-processdor gerou arquivo \"tmp_$1\"."
+	nome=`echo tmp_$1| sed 's/.c//'`
+	if newli -t $nome c 
+	then
+	\rm -f tipos.tes
+	echo "MSG: \"li\" bem sucedida gerou arquivo \"$nome.li\"."
+		if newchanomat -t $nome 
+		then
+		echo "MSG: \"chanomat\" gerou arquivo \"$nome.nli\"."
+		echo "MSG: \"$nome.nli\" esta' pronto para visualizacao de nos."
+		else
+		echo "ERRO: \"chanomat\" nao conseguiu gerar arquivo \"$nome.nli\"."
+		fi
+	else
+	echo "ERRO: \"li\" nao conseguiu gerar arquivo \"$nome.li\"."
+	fi
+else
+	echo "ERRO: Nao consegui rodar o preprocessador da linguagem C"
+fi

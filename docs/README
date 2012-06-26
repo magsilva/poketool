@@ -1,0 +1,320 @@
+
+Novas Funcoes da versao "newpoke" da POKE-TOOL 
+----------------------------------------------
+
+1. "What's new"
+---------------
+
+
+Modulo Pokernel
+---------------
+
+* Permite a analise estatica de programas escritos em linguagem C
+segundo o padrao ANSI C;
+
+* Gera grafo def com as definicoes e usos de variaveis em cada no';
+
+* Gera tres niveis de modelos de dados: 
+
+  - L0 e L3: nao considera definicoes e usos de variaveis do tipo
+ponteiro e campos de registros;
+
+  - L1 e L4: considera o usos de variaveis do tipo ponteiro e campos
+de registros de acordo com a abordagem Potencial Uso;
+
+  - L2 e L5: considera o usos de variaveis do tipo ponteiro e campos
+de registros juntamente com o tratamento de definicoes de ponteiros de
+acordo com a abordagem de Marx e Frankl.
+
+A diferenca entre L0 e L3 (L1 e L4; e L2 e L5) e' que no primeiro
+nivel sao tambem incluidas no no' 1 as variaveis globais que *nao*
+possuem nenhum uso na funcao analisada; o segundo nivel considera
+apenas as variaveis globais que possuem pelo menos um uso no corpo da
+funcao. A razao desta distincao foi evitar que as associacoes
+potenciais usos incluissem muitas variaveis, dificultando
+a visualizacao das associacoes.
+
+
+Programa executavel:  newpokernel
+---------------------------------
+
+newpokernel [-L<nivel do modelo de dados>] <nome do arquivo sem
+extensao> -f<nome da funcao> [-f<nome da funcao> ... ]
+
+Parametros:
+
+    o -Lx (x=0,1,2,3,4,5) - indica o nivel de modelo de dados; se este
+parametro for omitido considera-se o nivel L2;
+
+    o <nome do arquivo sem extensao> (mantido da versao anterior);
+
+    o -f<nome da funcao>: funcoes a serem analisadas; o parametro
+padrao -f_todas_ analisa todas as funcoes (mantido da versao anterior).
+
+Ex: newpokernel -L3 teste -fmain -ffoo
+   - analisa de acordo com o nivel de modelo de dados L3 as funcoes
+"main" e "foo" do programa teste.c.
+
+Modulo Descr
+------------
+
+* Determina as associacoes para os criterios 
+   
+   - todos p-usos;
+   - todos usos;
+   - todos du-caminhos;
+
+Os arquivos de descritores e de requisitos para os novos criterios sao
+os seguintes:
+
+   - todos p-usos: all_p_uses.tes e des_all_p_uses.tes;
+   - todos usos: all_uses.tes e des_all_uses.tes;
+   - todos du-caminhos: all_du_paths.tes e des_all_du_paths.tes;
+
+Programa executavel:  newdescr
+
+newdescr [-c<criterio>] <nome da funcao> -d<nome do diretorio> Parametros: 
+
+  o -c<selecao de criterios>:
+    gfc:  todos nos e todos arcos;
+    df:   todos nos, todos arcos, todos p-usos e todos usos;
+    dup:  todos nos, todos arcos e todos du-caminhos;
+    pu:   todos nos, todos arcos, todos pot-usos e todos pot-usos/du;
+    pdu:  todos nos, todos arcos e todos pot-du-caminhos;
+    df-pu:todos nos, todos arcos, todos p-usos, todos usos, todos pot-usos e todos pot-usos/du;
+    parametro omitido: todos criterios.
+
+  o <nome da funcao>:
+
+  o -d<nome do diretorio>: 
+
+ Ex: newdescr -cdf-pu foo -dfoo
+
+   - Nao sao gerados nem os descritores nem os requisitos dos
+criterios todos du-caminhos e pot-du-caminhos.
+
+Obs: Foi acrescentado o parametro para selecionar os criterios porque
+os criterios todos pot-du-caminhos e todos du-caminhos geram um numero
+muito grande de requisitos de teste para funcoes  complexas. Dessa
+forma, e' possivel selecionar conjuntos nos quais estes dois criterios
+nao sao incluidos para essas funcoes.
+
+Modulo Avaliador
+----------------
+
+* Permite a avaliacao dos seguintes criterios adicionais:
+   
+   - todos p-usos;
+   - todos usos;
+   - todos du-caminhos;
+
+O resultado da avaliacao desses criterios sao armazenados nos
+seguintes arquivos, respectivamente:
+
+   - Requisitos executados: exec_puses.tes, exec_uses.tes,
+exec_dupaths.tes;
+   - Requisitos nao-executados: pusesoutput.tes usesoutput.tes
+dupathsoutput.tes.
+
+* Permite a avaliacao simultanea de criterios.
+
+* Informacoes adicionais geradas:
+    
+   Para cada requisito de teste satisfeito, informa-se:
+
+   1) frequencia de execucao;
+   2) numero da instancia de execucao da funcao: numero de vezes
+que a funcao foi chamada ate' o requisito ser satisfeito;
+   3) numero do no' de definicao e numero na sequencia de execucao
+deste no;
+   4) numero do no' de uso e o  numero na sequencia de execucao.
+
+   Os itens 2, 3 e 4 referem-se `a primeira instancia do requisito,
+i.e., quando e' satisfeito pela primeira vez.
+
+   Estas informacoes sao armazenadas nos arquivos *freq.tes de cada
+criterio. Seu formato e' o seguinte:
+
+3 (3/10) (1 3/10) (6/23)
+^  ^ ^    ^ ^  ^   ^ ^
+|  | |    | |  |   | |
+|  | |    | |  |   | +---- posicao na sequencia de execucao do no' de uso
+|  | |    | |  |   +------ no' do uso
+|  | |    | |  +---------- posicao na sequencia de execucao do no' de def
+|  | |    | +------------- no' de def
+|  | |    +--------------- numero da instancia de execucao da funcao
+|  | +-------------------- numero total de instancias da funcao
+|  +---------------------- numero de instancias do requisito
++------------------------- numero do requisito
+
+
+Programa executavel:  newavaliador
+
+Parametros: 
+  - numeros dos criterios
+
+ O usuario pode indicar quais os criterios ele deseja que sejam
+avaliados simultaneamente:
+ 
+   - todos pot-du-caminhos (PDU -- no. 1);
+   - todos pot-usos (PU -- no. 2);
+   - todos pot-usos/du (PUDU -- no. 3);
+   - todos arcos (ARCS -- no. 4);
+   - todos nos (NOS -- no. 5);
+   - todos p-usos (PUSOS -- no. 6);
+   - todos usos (USOS -- no. 7);
+   - todos du-caminhos (DU -- no. 8);
+
+  - Y/N 
+
+    Y -- Indica que o usuario deseja que sejam gerados os arquivos de
+saida. Se nenhum parametro e' fornecido, assume-se este parametro.
+
+    N -- Nao sao gerados os arquivos de saida (exec_*.tes e
+*output.tes; *=pu|pdu|pudu|uses|puses|dupaths|arcs|nos). O objetivo
+desta opcao e' melhorar o desempenho da avaliacao visto que nao ha'
+sentido em gerar estes arquivos ao final de cada avaliacao quando se
+avalia muitos casos de teste.
+
+Ex: newaliador 1 2 3 4 5 6 7 8 N
+     - avalia todos os criterios e nao gera arquivos de saida.
+    newavaliador 1 2 3 
+     - avalia apenas a familia pot-usos e gera saidas.
+
+Script: newpokeaval
+-------------------
+
+newpokeaval - Avaliador de Casos de Teste da POKE-TOOL
+Uso: newpokeaval -d<dir. funcao> [-h|-f] -pdu|-pu|-pudu|-nos|-arcs|-puses|-uses|-du [-ne|-e] x to y
+-h   : mantem o arquivo historico das outras execucoes (opcional)
+-f   : gera apenas arquivos de frequencia sem gerar arquivos de saida (opcional)
+-d<dir. funcao> : diretorio da funcao a ser avaliada
+pdu  : todos potentiais du-caminhos
+pu   : todos potentiais usos
+pudu : todos potentiais usos/du
+nos  : todos nos
+arcs : todos arcos
+puses: todos usos predicativos
+uses : todos usos
+du   : todos du-caminhos
+[-ne|-e] : apresenta associacoes nao executadas ou executadas (opcional)
+x to y  : do caso de teste x ao y (obrigatorio)
+
+
+As principais modificacoes no script de avaliacao sao as seguintes:
+
+  - a opcao -f nao gera os arquivos com os resultados da avaliacao
+(exec_*.tes e *output.tes). O resultado da execucao com esta opcao sao
+os arquivos de frequencia *freqX.tes, onde X e' o numero do caso de
+teste.
+
+  - e' possivel indicar varios criterios a serem analisados
+simultaneamente pela ferramenta, utilizando as abreviaturas: -pu,
+-pudu, pdu, -puses, -uses, -du, -nos e -arcs.
+
+
+Script: newpoketool
+-------------------
+
+newpoketool - Analisador Estatico para Teste de Programas escritos em
+              Linguagem C
+
+Uso: newpoketool <nome do arquivo> [-L<nivel modelo de dados>] [-c<selecao de criterios>] [-I<Diretorios de Include>] [-D<defines>] -f<funcao> [-f<funcao>]
+
+  -Lx (x=0,1,2,3,4,5) - indica o nivel de modelo de dados; se este parametro for omitido considera-se nivel L2
+
+  -c<selecao de criterios>:
+        gfc:  todos nos e todos arcos;
+        df:   todos nos, todos arcos, todos p-usos e todos usos;
+        dup:  todos nos, todos arcos e todos du-caminhos;
+        pu:   todos nos, todos arcos, todos pot-usos e todos pot-usos/du;
+        pdu:  todos nos, todos arcos e todos pot-du-caminhos;
+        df-pu:todos nos, todos arcos, todos p-usos, todos usos, todos pot-usos e todos pot-usos/du;
+        parametro omitido: todos criterios.
+
+Este script recebe dois parametros adicionais:
+
+- Nivel do modelo de dados;
+- Selecao de criterios.
+
+Os novos parametros direcionam os programas newpokernel e newdescr
+para gerar os arquivos de acordo com o modelo de dados e o conjunto de
+criterios escolhidos. Os modelos e o conjunto de criterios "default"
+sao: L2 e todos os criterios.
+
+Outra alteracao neste script e' que ele pre-processa o arquivo .c e
+analisa o arquivo pre-processado, diferentemente da outra versao que
+analisava o arquivo .c. Por isto, e' feita uma chamada previa ao
+pre-processador do GNU cc (gcc).
+
+
+2. Como Instalar
+----------------
+
+Para nao confundir com a versao da poketool anterior, que pode
+continuar ser utilizada normalmente, todos os executaveis foram
+renomeados com o prefixo "new".  Igualmente, as variaveis de ambiente
+LITABS and POKETABS foram renomeadas para NEWLITABS and NEWPOKETABS.
+
+Dessa maneira, para instalar a newpoketool utilizar os seguites comandos:
+
+1> cd <diretorio de instalacao newpoke>
+
+2> tar xvf newpoke-exec.tar
+
+* Vao ser gerados os diretorios:
+    . <diretorio de instalacao newpoke>/newpoke/bin
+    . <diretorio de instalacao newpoke>/newpoke/bin/litabs
+    . <diretorio de instalacao newpoke>/newpoke/bin/poketabs
+
+3) Alterar as configuracoes do usuario:
+
+  3.1) Incluir diretorio <diretorio de instalacao newpoke>/newpoke/bin no caminho do usuario;
+
+  3.2) Ajustar as variaveis de ambiente NEWLITABS e NEWPOKETABS:
+
+  Considerando que o shell utilizado eh C-shell (.cshrc):
+
+  setenv NEWLITABS   <diretorio de instalacao newpoke>/newpoke/bin/litabs
+  setenv NEWPOKETABS <diretorio de instalacao newpoke>/newpoke/bin/poketabs
+
+  Considerando que o shell utilizado eh bourne-shell (.bashrc):
+
+  NEWLITABS="<diretorio de instalacao newpoke>/newpoke/bin/litabs"
+  NEWPOKETABS="<diretorio de instalacao newpoke>/newpoke/bin/poketabs"
+  export NEWLITABS NEWPOKETABS
+
+  3.3) logar novamente.
+
+
+3. Executaveis Principais
+-------------------------
+
+newavaliador*
+newchanomat*
+newdescr*
+newli*
+newpokeaval*
+newpokernel*
+newpoketool*
+pokeexec*
+
+(Hah outros executaveis que em principio nao devem ter muita utilidade
+para voces)
+
+poketabs/
+    chave.c
+    parserot.c
+    pathstd.tes
+    tabchave.c
+    tabsin.c
+    tabtrans.c
+    tipos.c
+    trans.c
+
+litabs/
+
+    tabchave.c
+    tabsin.c
+    tabtrans.c
+    tipos.c

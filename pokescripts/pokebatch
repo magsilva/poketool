@@ -1,0 +1,103 @@
+#!/bin/sh
+
+############################################################################
+#									   #
+# pokebatch -- Shell file to invoke several test cases in batch.           #
+#									   #
+#									   #
+#									   #
+############################################################################
+
+echo 'pokebatch - execucao em batch de casos de testes'
+
+case $# in
+
+0) echo 'Uso: pokebatch <nome do executavel> <dir casos de teste>  x y [+l|-l] [+t|-t] -f<nome da funcao> [-f<nome da funcao>]'  1>&2  ;
+   exit 2;;
+1) echo 'pokebatch Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+2) echo 'pokebatch Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+3) echo 'pokebatch Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+4) echo 'pokebatch Erro: numero incorreto de parametros!' 1>&2 ; exit 2;;
+*) nome_exe=$1; dir_tcase=$2; beg=$3; end=`expr $4 + 1`;;
+
+esac
+
+# Get functions name 
+
+shift
+shift
+shift
+shift
+
+while test "$1" != ""
+do
+        case $1 in
+        -l) linepars="$linepars $1";;
+        +l) linepars="$linepars $1";;
+        -t) linepars="$linepars $1";;
+        +t) linepars="$linepars $1";;
+         *) funcs="$funcs $1"
+        esac
+        shift
+done
+
+# First test if there is executable
+
+if  test -f $nome_exe
+then
+	:
+else
+	echo "pokebatch: Erro: Nao encontrei o executavel em \"$nome_exe\""
+	exit 2
+fi
+
+if test -d ./output
+then
+	echo "pokebatch: Msg: diretorio de saidas ja' existe"
+else
+	echo "pokebatch: Msg: Criando o diretorio de saidas"
+	mkdir ./output
+fi
+	
+#echo $dir_exe $dir_tcase $beg $end
+
+#echo 'passei aqui'
+
+
+while test "$beg" != "$end"
+do
+
+	echo ''
+	echo "		**** Executando Caso de Teste Numero $beg ****"
+	echo ''
+        
+        # remove previous path files
+
+	for eachfunc in `echo $funcs | sed 's/-f//g'`
+        do 
+		cd $eachfunc
+		rm -f path$beg.tes.Z path$beg.tes
+		cd ..
+	done
+
+	if cat $dir_tcase/input$beg | pokeaux $nome_exe $linepars -r$beg $funcs #> $dir_exe/output/output$beg
+	then
+		:
+	else
+	   echo "pokebatch: Erro: Nao consegui executar caso de teste $beg"
+	fi
+
+	beg=`expr $beg + 1`
+done
+
+exit 0
+
+
+
+
+
+
+
+
+
+

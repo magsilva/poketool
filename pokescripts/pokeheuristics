@@ -1,0 +1,245 @@
+#!/n/gnu/bin/bash
+
+############################################################################
+#									   #
+# pokeheuristics -- Shell file to produce debugging info using test info   #
+#									   #
+# author:  Marcos L. Chaim						   #
+# date:    2000/06/27							   #
+# version: 1.0   							   #
+#									   #
+############################################################################
+
+#echo 'pokeheuristics - Module for Generation of Heuristic Information'
+
+case $# in
+
+0|1) echo 'Use: pokeheuristics  -h<heuristic name> -f<func_name> [-f<func_name>] -c<criterion> [-D<faulty function>] [-F<fault-revealing testing features>] -testset <# of test cases> -fail <sequence of fail test cases> -succ <sequence of success test cases> [-random -fail <# of fail test cases> -succ <# of succ test cases>]' 
+      exit 2;;
+esac
+
+# It is necessary to run first the mapnodes program
+
+fail=FALSE
+no_fail_test_cases=0
+
+while test "$1" != "" 
+	do
+
+	par=$1;
+	case $par in
+	-c*) criterion=$par; otherpars="$otherpars $par" ;;
+	-D*) faulty_funcs="$faulty_funcs $par";;
+	-fail) otherpars="$otherpars $par"; fail=TRUE ;;
+	-f*) funcs="$funcs $par";;
+        -h*) heur=$par;;
+	-testset) otherpars="$otherpars $par";
+	          shift;
+		  no_test_cases=$1; continue;;
+	-F*) exper=TRUE; otherpars="$otherpars $par";;
+	-succ) otherpars="$otherpars $par"; fail=FALSE ;;
+          *) otherpars="$otherpars $par";
+	     if test "$fail" = "TRUE"
+	     then
+		no_fail_test_cases=`expr $no_fail_test_cases + 1`;
+	     fi
+	    ;;
+	esac
+
+	shift
+	done
+#set -x
+modls=`echo $funcs| sed 's/-f//g'`
+heurname=`echo $heur| sed 's/-h//g'`
+
+faulty_funcs=`echo $faulty_funcs | sed 's/-D//g'`
+
+#echo $modls
+#echo $heurname
+
+#echo $otherpars
+# Obtain heuristics results
+
+rm -f $heurname-results.tes
+error=0
+
+fault_nodes=0
+fault_prone_nodes=0
+fault_prone=0
+fault_reveal=0
+test_features=0
+nodes=0
+
+# Seleciona o criterio
+
+case $criterion in
+
+      -cpdu) freqfile=pdufreq;
+            reqfile=pdupaths.tes
+	    descfile=des_pdu.tes;;
+      -cpu)freqfile=pufreq;
+            reqfile=puassoc.tes
+	    descfile=des_pu.tes;;
+      -cpudu)freqfile=pudufreq;
+            reqfile=puassoc.tes
+	    descfile=des_pudu.tes;;
+      -carcs)freqfile=arcfreq;
+            reqfile=arcprim.tes
+	    descfile=des_arc.tes;;
+      -cnos)freqfile=nosfreq;
+            reqfile=nos_grf.tes
+	    descfile=des_nos.tes;;
+      -cpuses)freqfile=pusesfreq;
+            reqfile=all_p_uses.tes
+	    descfile=des_p_uses.tes;;
+      -cuses)freqfile=usesfreq;
+            reqfile=all_all_uses.tes
+	    descfile=des_all_uses.tes;;
+      -cdu)freqfile=dupathsfreq;
+            reqfile=all_du_paths.tes
+	    descfile=des_all_du_paths.tes;;
+esac
+
+rank_win=0
+func_win=""
+
+for mod in `echo $modls`
+    do
+	
+	if heuristic $heur -d$mod $otherpars 
+	then
+	    if test -f $mod/$heurname-$mod-results.tes
+	    then
+		if test "$heurname" != "H7"
+		then
+		echo "------------------------------------------------------------------------------" >> $heurname-results.tes
+		echo "Function $mod " >> $heurname-results.tes
+		echo "------------------------------------------------------------------------------" >> $heurname-results.tes
+		cat $mod/$heurname-$mod-results.tes | sed '/Fault-/d' >> $heurname-results.tes
+		else
+		rank=`cat $mod/$heurname-$mod-results.tes | awk '$1 == "1)" {print $2}'`
+		exp=`echo "$rank $rank_win" | awk '{if($1 >= $2) print 1; else print 0;}'`  
+	        if test "$exp" = "1"
+	        then
+		    if test "$rank" = "$rank_win"
+		    then
+		       func_win="$func_win $mod" 
+		    else
+		       func_win=$mod
+		       rank_win=$rank
+		    fi
+	        fi
+		fi
+	    else
+		echo "File $mod/$heurname-$mod-results.tes not found."
+	    fi
+	else
+	    echo "pokeheuristics: Error while processing heuristics for function $mod." 
+            error=1
+	fi
+    done
+
+if test "$heurname" = "H7"
+then
+   
+    # determine the results of H7
+    for mod in `echo $modls`
+	do
+	sel_func=`echo $func_win | grep ^$mod`
+	if test "$sel_func" = "$mod"
+	then
+	    echo "------------------------------------------------------------------------------" >> $heurname-results.tes
+	    echo "Function $mod " >> $heurname-results.tes
+	    echo "------------------------------------------------------------------------------" >> $heurname-results.tes
+	    cat $mod/$heurname-$mod-results.tes | sed '/Fault-/d' >> $heurname-results.tes
+	else
+	    rm -f $mod/$heurname-$mod-results.tes
+	fi
+    	done
+	
+fi
+
+
+if test "$exper" = "TRUE"
+then
+  # determine the experimental data
+
+  # determine the success of the fault-revealing metrics and calculate metrics data
+
+  for mod in `echo $modls`
+    do
+
+    # Initialize var aux
+    FR=0; FP=0; FPN=0; FRN=0
+    
+    if test -f $mod/$heurname-$mod-results.tes
+    then
+	FR=`cat $mod/$heurname-$mod-results.tes | awk '$1 == "Fault-revealing" {print $4 }'`
+	if test "$FR" = ""
+	then
+	    FR=0
+	fi
+
+	FP=`cat $mod/$heurname-$mod-results.tes | awk '$1 == "Fault-prone" {print $4 }'`
+    
+	FRN=`cat $mod/$heurname-$mod-results.tes | awk '$1 == "Fault-revealing-statements:" {print $2 }'`
+	FPN=`cat $mod/$heurname-$mod-results.tes | awk '$1 == "Fault-prone-statements:" {print $2 }'`
+    fi
+
+    TN=`cat $mod/des_nos.tes |awk '$1 == "Numero" && $2 == "Total" {print $6}'`
+    TF=`cat $mod/$descfile | awk '$1 == "Numero" && $2 == "Total" {print $6}'` 
+    
+    fault_nodes=`expr $fault_nodes + $FRN`
+    fault_prone_nodes=`expr $fault_prone_nodes + $FPN`
+    nodes=`expr $nodes + $TN`
+    
+    fault_reveal=`expr $fault_reveal + $FR`
+    fault_prone=`expr $fault_prone + $FP`
+    test_features=`expr $test_features + $TF`
+
+    echo -e "$mod: \t$FPN\t$FP " >> tmp1$$
+    done
+
+    # Determine success of statement metrics
+
+    no_succ_test_cases=`expr $no_test_cases - $no_fail_test_cases`
+    echo -n -e "$no_test_cases\t$no_fail_test_cases\t$no_succ_test_cases\t$fault_nodes\t$fault_prone_nodes\t$nodes\t$fault_reveal\t$fault_prone\t$test_features"
+
+    # Determine incremental effectiveness
+
+    sort -k 3,3n tmp1$$ > tmp2$$
+
+    for ffunc in `echo $faulty_funcs`
+       do
+       incr_nodes=`cat tmp2$$ | awk 'BEGIN {flag=0;s=0}
+			 $1 != "'$ffunc':" && flag == 0 { s += $2;}
+			 $1 == "'$ffunc':" && flag == 0 { s += $2; flag=1;}
+                         END { print s;}'`
+       incr_tf=`cat tmp2$$ | awk 'BEGIN {flag=0;s=0}
+			 $1 != "'$ffunc':" && flag == 0 { s += $3;}
+			 $1 == "'$ffunc':" && flag == 0 { s += $3; flag=1;}
+                         END { print s;}'`
+
+       echo -n -e "\t$incr_nodes\t$incr_tf"
+       done
+
+       # skip line
+       echo ""
+       if test -f $heurname-results.tes
+       then  
+	  echo "*******" >> $heurname-results-tot
+	  cat $heurname-results.tes >> $heurname-results-tot
+       fi
+       
+fi
+	
+rm -f tmp1$$
+rm -f tmp2$$
+
+#set +x
+exit $error
+
+
+
+
+

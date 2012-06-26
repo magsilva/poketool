@@ -1,0 +1,80 @@
+#!/bin/sh
+
+############################################################################
+#									   #
+# genflow -- Shell file to produce flow graphs of C functions.    	   #
+#									   #
+# author:  Marcos L. Chaim						   #
+# date:    1994/12/28							   #
+# version: 1.0   							   #
+#									   #
+############################################################################
+
+
+case $# in
+
+0) echo 'Uso: genflow <C file>'  1>&2  ;
+   exit 2;;
+esac
+
+# Set Trap routine
+
+trap ' # Clean up intermediate files before leaving
+   if -f temp$$ then 
+	rm -f temp$$
+   fi
+   exit 3
+' 1 2 9 15
+
+# Separe file name
+
+archive=$1
+echo "Arquivo em teste: $archive"
+
+# Obtain the preprocessed file
+
+if gcc -E $includes $defines $archive -o tmp_$archive 
+then
+    echo "* * $archive pre-processado * *"
+    sed '/^#/d' tmp_$archive > tmp1$$
+    mv tmp1$$ tmp_$archive
+    rm -f tmp1$$
+    archive=tmp_$archive
+    echo $archive
+else
+    echo "genflow erro: erro no pre-processamento $archive"
+    exit 1
+fi
+		
+# Obtain filename without extention
+
+filename=`echo $archive | sed 's/\.c//'` 
+
+
+# Firts pass, clean up all file from previous invocation of genflow
+
+rm -f *.nli *.li *.gfc
+
+#set value of return
+erro=0
+
+if newli -t $filename c $includes $defines
+then   
+    if newchanomat $filename
+    then
+         echo "genflow: Grafos de Fluxo de Controle gerados ok."
+    else
+         echo "genflow erro: problemas na geracao do grafo de fluxo de controle"
+	 erro=7
+    fi
+else
+   echo "genflow erro: problemas na geracao da linguagem intermediaria"
+fi
+
+rm -f tipos.tes
+
+exit $erro
+
+
+
+

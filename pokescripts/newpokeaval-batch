@@ -1,0 +1,52 @@
+#!/bin/sh
+
+case $# in
+0|1|2|3|4) echo 'newpokeaval-batch <begin> <end> -ffunc [-ffunc] -pu|-pudu|-pdu|-arcs|-nos|-puses|-uses|-du'  1>&2  ; exit 2;;
+esac
+
+# Get functions name 
+
+beg=$1
+end=$2
+
+shift
+shift
+
+
+while test "$1" != ""
+do
+        case $1 in
+         -pu|-pudu|-pdu|-arcs|-nos|-puses|-uses|-du) criteria="$criteria $1";;
+         *) funcs="$funcs $1"
+        esac
+        shift
+done
+
+
+for mod in  `echo $funcs | sed 's/-f//g'`
+	do
+	if test -d $mod
+	then
+		:
+	else
+		echo "Erro : diretorio \"$mod\" nao existe"
+		exit 2
+	fi
+	done
+
+
+for mod in  `echo $funcs | sed 's/-f//g'`
+  do
+  echo "Funcao $mod:"
+  if newpokeaval -d$mod  -ns $criteria $beg to $end
+  then
+     :
+  fi
+
+  done
+
+exit 0
+
+
+
+

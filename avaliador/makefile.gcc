@@ -1,0 +1,87 @@
+
+##########################################################################
+#									 #
+#        Makefile para a geracao do modulo avaliador da POKE-TOOL 	 #
+#									 #
+#	Autor: Marcos L. Chaim						 #
+#	Data : 30/04/93							 #
+#	%I%	%Y%	%E%	%U%                                      #
+##########################################################################
+
+#
+# Arquitetura e compilador
+#
+# Obs.: eh necessario criar um diretorio com o nome da arquietura,
+#	pois eh onde serao salvados os arquivos objetos.
+#
+
+#
+# Diretorios
+#
+
+# Diretorio com os arquivos .h
+INCL=$(DIRPOKE)/include
+
+# Diretorio com os binarios
+BIN=$(DIRPOKE)/bin
+
+# Diretorio com tabelas para o analisador sintatico
+POKETABS=$(BIN)/poketabs
+
+# Localizacao da biblioteca geral da poketool
+
+LIBPOKE = $(DIRPOKE)/lib/libnewpoke.a
+
+#
+# Arquivos executaveis
+#
+
+MODINT =newavaliador$(E)
+MODEXT =newavaliador$(E)
+
+#
+# Arquivos Objeto
+#
+
+O = o
+
+OBJS = $(ARCH)/itoa.$(O) $(ARCH)/mainava2.$(O) $(ARCH)/aval1.$(O) \
+$(ARCH)/aval2.$(O) $(ARCH)/aval3.$(O) $(ARCH)/aval4.$(O)
+
+#
+# Flags de compilacao
+#
+
+CFLAGS = $(GDB) -DANSI_C -I$(INCL) -c $(@F:%.o=%.c) -o $(@)
+
+
+#
+# Comandos para gerar executavel e copiar de arquivos 
+#
+
+COPY = cp
+
+
+avaliador: $(OBJS) $(LIBPOKE)
+	$(CC) $(OBJS) $(LIBPOKE) -lm -o newavaliador
+	$(COPY) $(MODINT) $(BIN)
+	$(COPY) pathstd.tes $(POKETABS)
+
+$(ARCH)/mainava2.$(O): mainava2.c $(INCL)/haval.h $(INCL)/hrotsem.h $(INCL)/util.h $(INCL)/newpokelib.h
+	$(CC) $(CFLAGS) 
+
+$(ARCH)/aval1.$(O): aval1.c $(INCL)/haval.h $(INCL)/hrotsem.h $(INCL)/util.h $(INCL)/newpokelib.h
+	$(CC) $(CFLAGS)
+
+$(ARCH)/aval2.$(O): aval2.c $(INCL)/haval.h $(INCL)/hrotsem.h $(INCL)/util.h $(INCL)/newpokelib.h
+	$(CC) $(CFLAGS)
+
+$(ARCH)/aval3.$(O): aval3.c $(INCL)/haval.h $(INCL)/hrotsem.h $(INCL)/util.h $(INCL)/newpokelib.h
+	$(CC) $(CFLAGS)
+
+$(ARCH)/aval4.$(O): aval4.c $(INCL)/haval.h $(INCL)/hrotsem.h $(INCL)/util.h $(INCL)/newpokelib.h
+	$(CC) $(CFLAGS)
+
+$(ARCH)/itoa.$(O): itoa.c
+	$(CC) $(CFLAGS)
+

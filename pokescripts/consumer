@@ -1,0 +1,19 @@
+#!/bin/sh
+
+
+# Consumidor
+
+while test -f cur-exec
+ do
+
+   while test -f end-test-case
+   do      
+      sleep 10
+   done
+
+   touch cur-aval
+
+   syncaval-Sort > /dev/null
+   rm -f cur-aval
+      
+ done

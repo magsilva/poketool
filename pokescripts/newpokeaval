@@ -1,0 +1,940 @@
+
+#!/bin/sh
+
+############################################################################
+#									   #
+# newpokeaval -- Shell file to invoke "avaliador" in stand alone form.	   #
+#									   #
+#									   #
+#									   #
+############################################################################
+
+echo 'newpokeaval - Avaliador de Casos de Teste da POKE-TOOL'
+
+keephis=""
+criteria=""
+beg=""
+end=""
+freqmode=""
+tarfile=""
+error=0
+nooutput=false
+case $# in
+
+0|1) echo 'Uso: newpokeaval -d<dir. funcao> [-h|-f] -pdu|-pu|-pudu|-nos|-arcs|-puses|-uses|-du [-ne|-e] x to y'  1>&2  ;
+     echo '-h   : mantem o arquivo historico das outras execucoes (opcional)' 1>&2; 
+     echo '-f   : gera apenas arquivos de frequencia sem gerar arquivos de saida (opcional)' 1>& 2;
+     echo '-d<dir. funcao> : diretorio da funcao a ser avaliada' 1>&2; 
+     echo 'pdu  : todos potentiais du-caminhos' 1>&2; 
+     echo 'pu   : todos potentiais usos' 1>&2; 
+     echo 'pudu : todos potentiais usos/du' 1>&2; 
+     echo 'nos  : todos nos' 1>&2; 
+     echo 'arcs : todos arcos'  1>&2; 
+     echo 'puses: todos usos predicativos' 1>&2; 
+     echo 'uses : todos usos' 1>&2; 
+     echo 'du   : todos du-caminhos'  1>&2; 
+     echo '[-ne|-e] : apresenta associacoes nao executadas ou executadas (opcional)'  1>&2; 
+     echo 'x to y  : do caso de teste x ao y (obrigatorio)'  1>&2; 
+     exit 2;;
+esac
+
+funcdir=$1;
+
+shift
+
+while test "$1" != ""
+do
+        case $1 in
+        -pdu)  criteria="$criteria 1 ";;
+        -pu)   criteria="$criteria 2 ";;
+        -pudu) criteria="$criteria 3 ";;
+        -arcs) criteria="$criteria 4 ";;
+        -nos)  criteria="$criteria 5 ";;
+        -puses)criteria="$criteria 6 ";;
+        -uses) criteria="$criteria 7 ";;
+        -du)   criteria="$criteria 8 ";;
+         to)   ;;
+	-h)    keephis=-h;;
+        -t)    freqmode=-f; tarfile=-t;;
+        -f)    freqmode=-f;;
+	-ns)   nooutput=true;; # does not generate an output
+	-ne)   showmode=-ne;;
+	 -e)   showmode=-e;;
+         *) if test "$beg" != "" 
+            then
+               lastcase=$1;
+	       end=`expr $1 + 1`;
+	    else
+	       beg=$1;
+	    fi ;;
+        esac
+        shift
+done
+
+if test "$beg" != ""
+then
+   if test "$end" != ""
+   then
+      :
+   else
+      echo 'newpokeaval Erro: numero incorreto de parametros!' 1>&2 ; exit 2;
+   fi
+else
+   beg=0;
+   end=1;
+fi
+
+if test "$criteria" != ""
+then
+   :
+else
+   echo 'newpokeaval Erro: numero incorreto de parametros!' 1>&2 ; exit 2;
+fi
+
+if test "$freqmode" = "-f"
+then
+   if test "$keephis" = "-h"
+   then
+   echo 'newpokeaval Erro: parametros -h e -f sao incompativeis!' 1>&2 ; exit 2;
+   fi
+fi
+
+if test "$tarfile" = "-t"
+then
+   tarfile=aval$beg-$lastcase.tar
+   compresstarfile=aval$beg-$lastcase.tar.Z
+   casestarfile=cases$beg-$lastcase.tar
+   casescompresstarfile=cases$beg-$lastcase.tar.Z
+fi
+
+# Set Trap routine
+
+trap ' # Clean up intermediate files before leaving
+   rm -f avalog.tes
+   if -f temp$$ then 
+	mv temp$$ path.tes 
+	rm -f temp$$
+   fi
+   exit 3
+' 1 2 9 15
+
+# Verify if exists the function directory
+
+funcdir=`echo $funcdir| sed 's/-d//g'`
+
+if test -d $funcdir
+then
+	:
+else
+	echo "newpokeaval Erro: nao existe o diretorio \"$funcdir\" !" 1>&2 ; 
+	exit 2;
+fi
+
+# Save current directory and change to function's
+
+oldir=`pwd`
+
+cd $funcdir
+for criterion in  `echo $criteria`
+do
+
+case $criterion in
+
+"1") 
+	if test "$keephis" != "-h" 
+	then
+		rm -f pduhis.tes; rm -f pdudif*.tes;
+	fi;;
+
+"2") 
+	if test "$keephis" != "-h" 
+	then
+		rm -f puhis.tes; rm -f pudif*.tes;
+	fi;;
+
+"3")  
+	if test "$keephis" != "-h" 
+	then
+		rm -f puduhis.tes; rm -f pududif*.tes;
+	fi;;
+
+"4") 
+	if test "$keephis" != "-h" 
+	then
+		rm -f archis.tes; rm -f arcdif*.tes;
+	fi;;
+
+"5") 
+	if test "$keephis" != "-h" 
+	then
+		rm -f noshis.tes; rm -f nosdif*.tes;
+	fi;;
+
+"6")
+	if test "$keephis" != "-h" 
+	then
+		rm -f puseshis.tes; rm -f pusesdif*.tes;
+	fi;;
+
+"7") 
+	if test "$keephis" != "-h" 
+	then
+		rm -f useshis.tes; rm -f usesdif*.tes;
+	fi;;
+
+"8")  
+	if test "$keephis" != "-h" 
+	then
+		rm -f dupathshis.tes; rm -f dupathsdif*.tes;
+	fi;;
+	
+*) echo "newpokeaval Erro: criterio \"$criterion\" nao e' suportado !" 1>&2 ; 
+   cd $oldir;
+   exit 2;;
+
+esac
+done
+
+# Verify show mode
+
+case $showmode in
+
+"-ne") showmode=1;;
+
+ "-e")  showmode=2;;
+
+   "") showmod=1;;
+
+*) echo "newpokeaval Erro: modo de apresentacao \"$showmode\" nao e' permitido !" 1>&2 ; 
+   cd $oldir;
+   exit 2;;
+
+esac
+
+# This var controls if at least one test case evaluation was successfull
+
+failall=true
+last=0
+
+# copy standard path.tes created when no function is executed.
+
+cp $NEWPOKETABS/pathstd.tes .
+
+while test "$beg" != "$end"
+do
+
+# Save history of the last evaluation to determine increment
+
+if test "$freqmode" != "-f" 
+then
+# Save increment if it is to do incremental analysis
+
+for criterion in  `echo $criteria`
+do
+case $criterion in
+
+1) if test -f pduhis.tes
+   then 
+	cp pduhis.tes pduhis.las	
+   else 
+	touch pduhis.las
+   fi
+   ;;
+
+2) if test -f puhis.tes
+   then 
+	cp puhis.tes puhis.las	
+   else 
+	touch puhis.las
+   fi
+   ;;
+
+3) if test -f puduhis.tes
+   then 
+	cp puduhis.tes puduhis.las	
+   else 
+	touch puduhis.las
+   fi
+   ;;
+
+4) if test -f archis.tes  
+   then 
+	cp archis.tes archis.las	
+   else 
+	touch archis.las
+   fi
+   ;;
+
+5) if test -f noshis.tes
+   then 
+	cp noshis.tes noshis.las	
+   else 
+	touch noshis.las
+   fi
+   ;;
+   
+6) if test -f puseshis.tes
+   then 
+	cp puseshis.tes puseshis.las	
+   else 
+	touch puseshis.las
+   fi
+   ;;
+
+7) if test -f useshis.tes  
+   then 
+	cp useshis.tes useshis.las	
+   else 
+	touch useshis.las
+   fi
+   ;;
+
+8) if test -f dupathshis.tes
+   then 
+	cp dupathshis.tes dupathshis.las	
+   else 
+	touch dupathshis.las
+   fi
+   ;;
+
+*) echo "newpokeaval Erro: criterio \"$criterion\" nao e' suportado !" 1>&2 ; 
+   cd $oldir;
+   exit 2;;
+
+esac
+done
+else
+# remove history file in order to not influence the analysis of each test case
+
+for criterion in  `echo $criteria`
+do
+case $criterion in
+
+1) rm  -f pduhis.tes
+   ;;
+
+2) rm  -f puhis.tes
+   ;;
+
+3) rm  -f puduhis.tes
+   ;;
+
+4) rm  -f archis.tes  
+   ;;
+
+5) rm  -f noshis.tes
+   ;;
+   
+6) rm  -f puseshis.tes
+   ;;
+
+7) rm  -f useshis.tes  
+   ;;
+
+8) rm  -f dupathshis.tes
+   ;;
+
+*) echo "newpokeaval Erro: criterio \"$criterion\" nao e' suportado !" 1>&2 ; 
+   cd $oldir;
+   exit 2;;
+
+esac
+done
+fi
+
+	echo ''
+	echo "		**** Avaliando Caso de Teste Numero $beg ****"
+	echo ''
+
+	if test -f "path$beg.tes"
+	then
+	  if test -f path.tes 
+	  then
+	     mv path.tes temp$$
+	     cp path$beg.tes path.tes
+	  else
+	     cp path$beg.tes path.tes
+	  fi
+	else
+	   if test -f "path$beg.tes.Z"
+	   then
+	      uncompress path$beg.tes.Z
+	      if test -f path.tes 
+	      then
+	         mv path.tes temp$$
+	         cp path$beg.tes path.tes
+	      else
+	         cp path$beg.tes path.tes
+	      fi	      
+	   else
+	      if test -f path.tes && test "$beg" = "$lastcase"
+	      then
+		echo ''
+		echo "newpokeaval Mensagem: avaliacao do caso de teste utilizara o arquivo \"path.tes\" !"
+		cp path.tes temp$$
+	      else
+	        if test "$beg" = "$lastcase"
+		then # last test case must be "evaluated", even without a path.tes
+ 	          echo " 0" > path.tes
+		else
+	   	  echo "newpokeaval Mensagem: arquivo \"path$beg.tes\" ausente; avaliacao abortada !"
+		  beg=`expr $beg + 1`
+		  continue
+		fi
+              fi
+	   fi
+        fi
+
+        if diff path.tes pathstd.tes 1> diff$$ 2> /dev/null && test "$lastcase" != "$beg"         
+	then
+	  echo "newpokeaval: Msg: Caso de teste $beg NAO executou a funcao!"
+	  rm -f diff$$
+	  execution=false
+        else
+	  rm -f diff$$
+          execution=true
+	  
+# 	  echo " 0" >> path.tes
+	  
+	  if test "$lastcase" != "$beg" 
+          then
+	     output=N
+	  else
+             if test "$freqmode" != "-f"
+             then
+               output=Y
+             fi
+          fi
+
+	  if newavaliador $criteria $output
+	  then 
+		# At least one test case was successfull
+		#cp exec_pu.tes exec_pu.tes.old
+		failall=false
+	  else
+		# This test case failed
+		
+		rm -f avalog.tes # Clean up intermediate files
+		echo ''
+		echo "newpokeaval Mensagem: avaliacao falhou para o caso de teste #$beg"
+		beg=`expr $beg + 1`
+		continue
+	  fi
+        fi
+	if test -f temp$$ 
+	then
+		cp temp$$ path.tes
+		rm temp$$
+	else
+		rm -f path.tes
+	fi
+
+        # compress the path$beg.tes
+	
+	if test -f path$beg.tes
+	then
+	   rm -f path$beg.tes.Z
+	   compress path$beg.tes 2> /dev/null
+        fi
+
+if test "$freqmode" != "-f" 
+then
+# Save the increment of satisfied assotiations, if any.
+
+for criterion in  `echo $criteria`
+do
+case $criterion in
+
+1) if diff pduhis.las pduhis.tes 1> dif$$ 2> /dev/null 
+	then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhuma associacao do criterio todos pot-du-caminhos!"
+   	rm -f pduhis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "pdudif$beg-$last.tes" 
+   	rm -f pduhis.las
+   	rm -f dif$$
+   fi
+   
+   ;;
+
+
+2) if diff puhis.las puhis.tes 1> dif$$ 2> /dev/null 
+   then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhuma associacao do criterio todos pot-usos !"
+   	rm -f puhis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "pudif$beg-$last.tes" 
+   	rm -f puhis.las
+   	rm -f dif$$
+   fi
+   
+   ;;
+
+3) if diff puduhis.las puduhis.tes 1> dif$$ 2> /dev/null
+	then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhuma associacao todos pot-usos/du!"
+   	rm -f puduhis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "pududif$beg-$last.tes" 
+   	rm -f puduhis.las
+   	rm -f dif$$
+   fi
+
+   ;;
+
+4) if diff archis.las archis.tes 1> dif$$ 2> /dev/null
+	then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhum arco do criterio todos arcos!"
+   	rm -f archis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "arcdif$beg-$last.tes" 
+   	rm -f archis.las
+   	rm -f dif$$
+   fi
+   
+   ;;
+
+5) if diff noshis.las noshis.tes 1> dif$$ 2> /dev/null
+	then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhum no' do criterio todos nos!"
+   	rm -f noshis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "nosdif$beg-$last.tes" 
+   	rm -f noshis.las
+   	rm -f dif$$
+   fi
+   
+   ;;
+
+6) if diff puseshis.las puseshis.tes 1> dif$$ 2> /dev/null 
+   then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhuma associacao do criterio todos p-usos!"
+   	rm -f puseshis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "pusesdif$beg-$last.tes" 
+   	rm -f puseshis.las
+   	rm -f dif$$
+   fi
+   
+   ;;
+
+7) if diff useshis.las useshis.tes 1> dif$$ 2> /dev/null
+	then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhuma associacao do criterio todos usos!"
+   	rm -f useshis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "usesdif$beg-$last.tes" 
+   	rm -f useshis.las
+   	rm -f dif$$
+   fi
+   
+   ;;
+   
+8) if diff dupathshis.las dupathshis.tes 1> dif$$ 2> /dev/null
+	then
+	echo "newpokeaval: Msg: Caso de teste $beg NAO matou nenhuma associacao do criterio todos du-caminhos!"
+   	rm -f dupathshis.las
+	rm -f dif$$
+   else
+   	cat dif$$ | grep ">" | awk '{printf "%s\n",$2}' > "dupathsdif$beg-$last.tes" 
+   	rm -f dupathshis.las
+   	rm -f dif$$
+   fi
+
+   ;;
+
+
+*) echo "newpokeaval Erro: criterio \"$criterion\" nao e' suportado !" 1>&2 ; 
+   cd $oldir;
+   exit 2;;
+
+esac
+
+done
+
+else
+if test "$execution" = "true" 
+then
+for criterion in  `echo $criteria`
+do
+case $criterion in
+
+1) if test -f pdufreq.tes
+   then
+     echo "Case $beg:" >> pducases.tes
+     awk '{printf("%d ",$1)} END {printf("\n")}' pdufreq.tes >> pducases.tes
+     mv pdufreq.tes pdufreq$beg.tes
+   fi
+   freqfile=pdufreq$beg.tes
+   ;;
+
+2) if test -f pufreq.tes
+   then
+     echo "Case $beg:" >> pucases.tes
+     awk '{printf("%d ",$1)} END {printf("\n")}' pufreq.tes >> pucases.tes
+     mv pufreq.tes pufreq$beg.tes 
+   fi
+   freqfile=pufreq$beg.tes
+   ;;
+
+3) if test -f pudufreq.tes
+   then
+     echo "Case $beg:" >> puducases.tes
+     awk '{printf("%d ",$1)} END {printf("\n")}' pudufreq.tes >> puducases.tes
+     mv pudufreq.tes pudufreq$beg.tes
+   fi
+   freqfile=pudufreq$beg.tes
+   ;;
+
+4) if test -f arcfreq.tes
+   then
+     echo "Case $beg:" >> arccases.tes
+     awk '{printf("%d ",$1)} END {printf("\n")}' arcfreq.tes >> arccases.tes
+     mv arcfreq.tes arcfreq$beg.tes
+   fi
+   freqfile=arcfreq$beg.tes
+   ;;
+
+5) if test -f nosfreq.tes
+   then
+      echo "Case $beg:" >> noscases.tes
+      awk '{printf("%d ",$1)} END {printf("\n")}' nosfreq.tes >> noscases.tes
+     mv nosfreq.tes nosfreq$beg.tes
+   fi
+   freqfile=nosfreq$beg.tes
+   ;;
+
+6) if test -f pusesfreq.tes 
+   then
+     echo "Case $beg:" >> pusescases.tes
+     awk '{printf("%d ",$1)} END {printf("\n")}' pusesfreq.tes >> pusescases.tes
+     mv pusesfreq.tes pusesfreq$beg.tes
+   fi
+   freqfile=pusesfreq$beg.tes
+   ;;
+
+7) if test -f usesfreq.tes 
+   then
+     echo "Case $beg:" >> usescases.tes
+     awk '{printf("%d ",$1)} END {printf("\n")}' usesfreq.tes>> usescases.tes
+     mv usesfreq.tes usesfreq$beg.tes
+   fi
+   freqfile=usesfreq$beg.tes
+   ;;
+   
+8) if test -f dupathsfreq.tes
+   then
+     echo "Case $beg:" >> dupathscases.tes
+     awk '{printf("%d ",$1)} END {printf("\n")}' dupathsfreq.tes>> dupathscases.tes
+     mv dupathsfreq.tes dupathsfreq$beg.tes
+   fi
+   freqfile=dupathsfreq$beg.tes
+   ;;
+
+
+*) echo "newpokeaval Erro: criterio \"$criterion\" nao e' suportado !" 1>&2 ; 
+   cd $oldir;
+   exit 2;;
+
+esac
+
+if test "$tarfile" != "" && test -f $freqfile
+then
+  cd $oldir
+  if test -f $tarfile
+  then
+     if tar rvf $tarfile $funcdir/$freqfile
+     then
+       rm -f $funcdir/$freqfile
+     else
+       echo "newpokeaval Erro: nao foram adicionados arquivos $funcdir/$freqfile ao arquivo $tarfile" 
+     fi
+  else
+     if test -f $compresstarfile
+     then # uncompress tarfile
+       if uncompress $compresstarfile
+       then # add to tar file
+         if tar rvf $tarfile $funcdir/$freqfile
+         then
+           rm -f $funcidr/$freqfile
+         else
+           echo "newpokeaval Erro: nao foi adicionado arquivo $funcdir/$freqfile ao arquivo $tarfile" 
+         fi
+       else
+         echo "newpokeaval Erro: nao consegui descomprimir $compresstarfile"
+       fi
+     else  # create tar file
+       if tar cvf $tarfile $funcdir/$freqfile
+       then
+         rm -f $funcdir/$freqfile
+       else
+         echo "newpokeaval Erro: nao foi adicionado arquivo $funcdir/$freqfile ao arquivo tar  $tarfile" 
+       fi
+     fi
+  fi
+  
+  cd $oldir/$funcdir
+fi
+
+done
+fi
+fi
+	last=$beg
+	beg=`expr $beg + 1`
+done
+
+if test "$failall" = "true"
+then
+	echo "newpokeaval Erro: avaliacao falhou para todos casos de teste"
+   	cd $oldir;
+	exit 1
+fi
+
+# Show results
+
+if test "$freqmode" != "-f"
+then
+# Show results only if history was kept 
+
+if test "$nooutput" = "false"
+then
+for criterion in  `echo $criteria`
+do
+case $criterion in
+
+1) if test "$showmode" = 1 
+   then 
+	if test -f pduoutput.tes
+        then
+          more pduoutput.tes;
+        fi
+   else 
+	if test -f exec_pdu.tes
+        then
+           more exec_pdu.tes;
+        fi
+   fi
+   ;;
+
+2) if test "$showmode" = 1 
+   then 
+	if test -f puoutput.tes	 
+	then
+	  more puoutput.tes
+        fi
+   else 
+	if test -f exec_pu.tes 
+	then
+	  more exec_pu.tes
+        fi
+   fi
+   ;;
+
+3) if test "$showmode" = 1 
+   then 
+	if test -f puduoutput.tes
+	then 
+	  more puduoutput.tes 
+        fi
+   else 
+	if test -f exec_pudu.tes 
+	then 
+	  more exec_pudu.tes
+	fi
+   fi
+   ;;
+
+4) if test "$showmode" = 1 
+   then 
+	if test -f arcoutput.tes 
+	then
+	  more arcoutput.tes
+	fi
+   else 
+	if test -f exec_arc.tes 
+	then
+	  more exec_arc.tes
+	fi
+   fi
+   ;;
+
+5) if test "$showmode" = 1 
+   then 
+	if test -f nosoutput.tes
+	then 
+     	  more nosoutput.tes 
+        fi
+   else 
+	if test -f exec_nos.tes
+	then 
+	  more exec_nos.tes 
+        fi
+   fi
+   ;;
+   
+6) if test "$showmode" = 1 
+   then 
+	if test -f pusesoutput.tes
+        then
+	   more pusesoutput.tes 
+        fi
+   else 
+	if test -f exec_puses.tes
+        then
+           more exec_puses.tes 
+        fi	
+   fi
+   ;;
+
+7) if test "$showmode" = 1 
+   then 
+	if test -f usesoutput.tes
+        then
+           more usesoutput.tes
+        fi
+   else 
+	if test -f exec_uses.tes
+        then
+           more exec_uses.tes
+        fi
+   fi
+   ;;
+
+8) if test "$showmode" = 1 
+   then 
+	if test -f dupathsoutput.tes
+        then
+           more dupathsoutput.tes
+        fi
+   else 
+	if test -f exec_dupaths.tes
+        then
+           more exec_dupaths.tes 
+        fi
+   fi
+   ;;
+
+*) echo "newpokeaval Erro: criterio \"$criterion\" nao e' suportado !" 1>&2 ; 
+   cd $oldir;
+   exit 2;;
+
+esac
+done
+fi
+else
+ if test "$tarfile" != ""
+ then
+  if test -f $oldir/$tarfile
+    then
+  	if compress $oldir/$tarfile 
+  	then
+      	  :
+  	else
+     	  echo "newpokeaval Erro: Nao foi possivel comprimir tarfile $oldir/$tarfile"
+          error=1
+  	fi
+    else
+        echo "newpokeaval Erro:  tarfile $oldir/$tarfile  nao existe"
+        error=1
+  fi
+  
+  for criterion in  `echo $criteria`
+  do
+    case $criterion in
+      1)casesfile=pducases.tes;;
+      2)casesfile=pucases.tes;;
+      3)casesfile=puducases.tes;;
+      4)casesfile=arccases.tes;;
+      5)casesfile=noscases.tes;;
+      6)casesfile=pusescases.tes;;
+      7)casesfile=usescases.tes;;
+      8)casesfile=dupathscases.tes;;
+    esac
+
+  if test -f $casesfile
+  then
+    cd $oldir
+    if test -f $casestarfile
+    then
+       if tar rvf $casestarfile $funcdir/$casesfile
+       then
+          rm -f $funcdir/$casesfile
+       else
+          echo "newpokeaval Erro: nao foi adicionado arquivo $funcdir/$casesfile ao arquivo $casestarfile"
+          error=1
+       fi
+    else
+       if test -f $casescompresstarfile
+       then # uncompress tarfile
+         if uncompress $casescompresstarfile
+         then # add to tar file
+           if tar rvf $casestarfile $funcdir/$casesfile
+           then
+              rm -f $funcdir/$casesfile
+           else
+              echo "newpokeaval Erro: nao foi adicionado arquivo $funcdir/$casesfile ao arquivo $casestarfile"
+              error=1
+           fi
+         else
+           echo "newpokeaval Erro: nao consegui descomprimir $casescompresstarfile"
+           error=1
+         fi
+       else  # create tar file
+         if tar cvf $casestarfile $funcdir/$casesfile
+         then
+           rm -f $funcdir/$casesfile
+         else
+           echo "newpokeaval Erro: nao foi adicionado arquivo $funcdir/$casesfile ao arquivo tar  $casestarfile"
+           error=1
+         fi
+       fi
+    fi
+   cd $oldir/$funcdir
+  fi
+  done
+
+  cd $oldir;
+  if test -f $casestarfile
+  then
+    if compress $casestarfile
+    then
+          :
+    else
+          echo "newpokeaval Erro: Nao foi possivel comprimir $casestarfile"
+          error=1
+    fi
+  else
+     echo "newpokeaval Erro: $casestarfile nao existe"
+     error=1
+  fi
+   
+ fi
+fi
+
+# remove standard path.tes
+
+rm -f pathstd.tes 
+
+cd $oldir;
+
+case  $error in
+0) exit 0 ;;
+*) exit 1;;
+esac
+
+
+
+
+
+
+
+
+
+
