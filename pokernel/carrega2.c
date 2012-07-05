@@ -72,7 +72,7 @@ char * pokepath;
  pokepath = getenv("NEWPOKETABS");
  if(pokepath == (char *) NULL)
    {
-    msg_print("* * Erro Fatal: Nao consegui o caminho das tabelas * *\n");
+    msg_print("* * Erro Fatal (pokernel/carrega2.c:75): Nao consegui o caminho das tabelas * *\n");
     exit(1);
    }
 

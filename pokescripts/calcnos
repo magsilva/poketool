@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/sh -x
+
+CC=/opt/gcc-3.3.6/bin/gcc
 
 echo 'calcnos - Gerador dos Grafos de Fluxo de Programa de um <arquivo>.c'
 echo 'calcnos - Gera os arquivos tmp_<arquivo>.li, tmp_<arquivo>.nli'
@@ -16,7 +18,7 @@ nome=`echo $1| sed 's/.c//'`
 
 \rm -f tmp_$1
 
-if gcc -E $1 -o tmp_$1
+if $CC -E $1 -o tmp_$1
 then
 	echo "MSG: Pre'-processdor gerou arquivo \"tmp_$1\"."
 	nome=`echo tmp_$1| sed 's/.c//'`

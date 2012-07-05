@@ -130,7 +130,7 @@ char * argv[];
 
  lipath=getenv("NEWLITABS");
  if (lipath == (char *) NULL)
-     error("* * Erro Fatal: Nao consegui encontrar caminho das tabelas * *\n");
+     error("* * Erro Fatal (li/li.c:133): Nao consegui encontrar caminho das tabelas * *\n");
 
  strcpy(nom_arq,lipath);
 

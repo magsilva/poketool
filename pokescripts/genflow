@@ -10,6 +10,7 @@
 #									   #
 ############################################################################
 
+CC=/opt/gcc-3.3.6/bin/gcc
 
 case $# in
 
@@ -33,7 +34,7 @@ echo "Arquivo em teste: $archive"
 
 # Obtain the preprocessed file
 
-if gcc -E $includes $defines $archive -o tmp_$archive 
+if $CC -E $includes $defines $archive -o tmp_$archive 
 then
     echo "* * $archive pre-processado * *"
     sed '/^#/d' tmp_$archive > tmp1$$

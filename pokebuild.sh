@@ -7,7 +7,7 @@
 ARCH=`arch`
 #VERSION=`date +%F`
 VERSION="SVN"
-CC=gcc
+CC=/opt/gcc-3.3.6/bin/gcc
 DIRPOKE=`pwd`
 
 export ARCH CC DIRPOKE 

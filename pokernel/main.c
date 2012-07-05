@@ -153,7 +153,7 @@ char *argv[];
  tabpath = getenv("NEWPOKETABS");
  if(tabpath == (char *) NULL)
    {
-    msg_print("* * Erro Fatal: Nao consegui o caminho das tabelas * *\n");
+    msg_print("* * Erro Fatal (pokernel/main.c:156): Nao consegui o caminho das tabelas * *\n");
     exit(1);
    }
 
@@ -167,7 +167,7 @@ char *argv[];
 #endif
 
  if(arq1==(FILE *)NULL)
-    error("* * Erro Fatal: Nao consegui abrir o arquivo com linguagem intermediaria * *\n");
+    error("* * Erro Fatal (pokernel/main.c:170): Nao consegui abrir o arquivo com linguagem intermediaria * *\n");
 
  strcpy(nome,get_file_name());
  strcat(nome,".c");

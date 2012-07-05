@@ -24,7 +24,7 @@
 #	pois eh onde serao salvados os arquivos objetos.
 #
 
-GDB= 
+GDB=-g
 DEBUG= 
 
 #

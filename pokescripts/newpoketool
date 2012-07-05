@@ -10,6 +10,8 @@
 #									   #
 ############################################################################
 
+CC=/opt/gcc-3.3.6/bin/gcc
+
 echo 'newpoketool - Analisador Estatico para Teste de Programas escritos em Linguagem C'
 
 case $# in
@@ -84,8 +86,8 @@ fi
 # Obtain the preprocessed file
 
 #set -x
-echo "gcc -E $archive $includes $defines -o tmp_$archive"
-if gcc -E $includes $defines $archive -o tmp_$archive 
+echo "$CC -E $archive $includes $defines -o tmp_$archive"
+if $CC -E $includes $defines $archive -o tmp_$archive 
 then
     echo "* * $archive pre-processado * *"
     sed '/^#/d' tmp_$archive > tmp1$$

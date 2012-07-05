@@ -19,7 +19,7 @@ POKETABS = ${HOME}/poketool/bin/poketabs
 CFLAGS = -c -I$(INCL)
 
 # INSERIDO POE EYN EM 09/10/96
-CC = gcc
+CC = /opt/gcc-3.3.6/bin/gcc
 
 
 avaliador: $(OBJS)
