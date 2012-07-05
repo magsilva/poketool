@@ -1,7 +1,5 @@
 #!/bin/sh -x
 
-CC=/opt/gcc-3.3.6/bin/gcc
-
 echo 'calcnos - Gerador dos Grafos de Fluxo de Programa de um <arquivo>.c'
 echo 'calcnos - Gera os arquivos tmp_<arquivo>.li, tmp_<arquivo>.nli'
 echo '          e .gfc do <arquivo>.c'

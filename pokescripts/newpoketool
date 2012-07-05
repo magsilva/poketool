@@ -10,8 +10,6 @@
 #									   #
 ############################################################################
 
-CC=/opt/gcc-3.3.6/bin/gcc
-
 echo 'newpoketool - Analisador Estatico para Teste de Programas escritos em Linguagem C'
 
 case $# in

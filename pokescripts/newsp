@@ -1,7 +1,5 @@
 #!/bin/sh
 
-CC=/opt/gcc-3.3.6/bin/gcc
-
 nome=`echo $1| sed 's/.c//'`
 
 echo $1

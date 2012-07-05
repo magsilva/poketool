@@ -7,10 +7,9 @@
 ARCH=`arch`
 #VERSION=`date +%F`
 VERSION="SVN"
-CC=/opt/gcc-3.3.6/bin/gcc
 DIRPOKE=`pwd`
 
-export ARCH CC DIRPOKE 
+export ARCH DIRPOKE 
 
 # Creating directories for binaries, scripts and tables
 
