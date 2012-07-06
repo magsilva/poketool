@@ -7,6 +7,6 @@ clean:
 	rm -rf descr/$(ARCH) descr/newdescr
 	rm -rf heuristic/$(ARCH) heuristic/heuristic
 	rm -rf li/$(ARCH) li/newli
-	rm -rf lib/$(ARCH)
+	rm -rf lib/$(ARCH) lib/libnewpoke.a
 	rm -rf pokernel/$(ARCH) pokernel/newpokernel
 	
