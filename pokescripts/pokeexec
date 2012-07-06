@@ -259,7 +259,7 @@ while test "$endofsession" = "y"
 		fi
 	fi
 	chmod +x cmd$$
-	cmd$$
+	./cmd$$
 	rm -f cmd$$
 	echo
         echo =========================

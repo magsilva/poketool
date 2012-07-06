@@ -29,11 +29,16 @@ Um "Tour pela poketool:
 
 # Para jogar em um arquivo
 
->> ls -l | grep ^d | awk '{printf " -f%s ", $9}' > tmp
+>> ls -l | grep ^d | awk '{printf " -f%s ", $9}' > tmp_func
+
+# Para checar o resultado
+
+>> cat tmp_func
+-fcode_string -fis_str_keyword -fmain -fprint_aufgabe -fprint_dateien -fprocess_switches -fusage
 
 # Utilizar o pokeexec para gerar os arquivos de caminhos:
 
-pokeexec testeprog -l -fcode_string -fis_str_keyword -fmain -fprint_aufgabe -fprint_dateien -fprocess_switches -fusage
+pokeexec "./testeprog" +l -k `cat tmp_func`
 
 # Obs: Nos diretorios das funcoes sao gerados arquivos path?.tes com os caminhos executados. Normalmente, ele sao compridos e tem o formato path?.tes.Z
 
