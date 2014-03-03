@@ -55,55 +55,50 @@
 #include "header.h"
 #include "hparserg.h"
 
-int inigrf(fnome, g)
-char *fnome;
-struct grafo **g;
+int inigrf(char * fnome, struct grafo ** g) {
+	int i, j, k, n;
+	struct grafo *gaux;
+	FILE *fp;
 
-{
-/* declaracao de variaveis locais */
+	/* iniciando */
+	fp = fopen(fnome, "r");      /* abrindo o arquivo que contem o grafo de fluxo de controle */
+	if (fp == NULL) {
+		char mensagem[255];
+		sprintf(mensagem, "Error: could not open file with data of the control flow graph (%s)\n", fnome);
+		error(mensagem);
+	}
 
-int i,j,k,n;
-struct grafo *gaux;
-FILE *fp;
+	fscanf(fp, "%d", &n); /* obtive numero de nos */
+	gaux = (struct grafo *) malloc((n + 1) * sizeof(struct grafo)); /* aloquei memoria para o nos do grafo */
+	if (gaux == NULL) {
+		error("Error: could not alloc memory to store the control flow graph");
+	}
 
-/* iniciando */
+	/* iniciando com todos os apontadores de listas de sucessores */
+	for (i = 0; i <= n; ++i) {
+		gaux[i].list_suc = NULL;
+	}
 
-fp=fopen(fnome,"r");      /* abrindo o arquivo que contem o grafo de fluxo de controle */
-if(fp==NULL)
-   error("* * Erro Fatal: Nao consegui abrir o arquivo com o grafo de fluxo de controle * *\n");
+	/* construindo o grafo na memoria */
+	k=1;
+	while (fscanf(fp, "%d", &i) != EOF && k <= n) {
+		(gaux + i)->num = i;
+		(gaux +i )->list_suc = NULL;
+		if (i > n || i <= 0) {
+			error("Error: CFG is not correctly specified in the file");
+		}
+		for (fscanf(fp, "%d", &j); j != 0; fscanf(fp,"%d",&j)) {
+			ins_elem(&((gaux+i)->list_suc),j);
+		}
+		k++;
+	}
+	if (fscanf(fp, "%d", &i) != EOF) {
+		error("Error: there are more nodes than expected to be read");
+	}
 
-fscanf(fp,"%d",&n); /* obtive numero de nos */
-gaux=(struct grafo *)malloc((n+1)*sizeof(struct grafo)); /* aloquei memoria para o nos do grafo */
-
-if(gaux==NULL)
-  error("* * Erro Fatal: Nao consegui alocar espaco para o grafo * *\n");
-
-/* iniciando com todos os apontadores de listas de sucessores */
-
-for(i = 0; i <= n; ++i)
-  gaux[i].list_suc = (struct no *) NULL;
-
-/* construindo o grafo na memoria */
-
-k=1;
-
-while(fscanf(fp,"%d",&i)!=EOF && k<=n)
-     {
-      (gaux+i)->num=i;
-      (gaux+i)->list_suc=NULL;
-      if(i>n || i<=0)
-          error("* * Erro Fatal: Este grafo nao esta' \
-	  especificado corretamente * *\n");
-      for(fscanf(fp,"%d",&j);j!=0;fscanf(fp,"%d",&j))
-	   ins_elem(&((gaux+i)->list_suc),j);
-      ++k;
-     }
-if(fscanf(fp,"%d",&i)!=EOF)
-    error("* * Erro Fatal: Mais nos do que o especificado * *\n");
-
-fclose(fp);
-*g=gaux;
-return(n);
+	fclose(fp);
+	*g = gaux;
+	return n;
 }
 
 /********************************************************************/
