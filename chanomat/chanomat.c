@@ -25,11 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef TURBO_C
 #include <malloc.h>
-#else
-#include <alloc.h>
-#endif
 
 #include "util.h"
 #include "stack.h"
