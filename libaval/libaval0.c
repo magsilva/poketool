@@ -20,14 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <varargs.h>
-
-#ifdef TURBO_C
-
-#include <process.h>
-#include <conio.h>
-
-#endif
+#include <stdarg.h>
 
 #include "util.h"
 #include "hparserg.h"
@@ -41,10 +34,7 @@ static AvalStr * curfunc;
 static int cur_no_func;
 static int no_funcs;
 
-void Aval_Start(number_funcs, va_alist)
-int number_funcs;
-va_dcl
-{
+void Aval_Start(int number_funcs, ...) {
  int i;
  char * argv[] = {"mainaval2", "N", "2", "3", "4", "5", "6", "7"};
  int argc = 8;
@@ -53,8 +43,7 @@ va_dcl
  */
  
  va_list  parameters;
-
- va_start(parameters);
+ va_start(parameters, number_funcs);
 
  no_funcs=number_funcs;
 

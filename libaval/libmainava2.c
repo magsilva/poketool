@@ -368,6 +368,7 @@ AUTOMATO * pointer_aux = (AUTOMATO *) NULL, * pointer_aux2 ;
       break;
  
       default:
+		break;
  
       }
     
@@ -532,7 +533,7 @@ void AvalStr_end(AvalStr *pfunc)
     break;
 
    default:
-
+	break;
    }
   }
  
@@ -707,6 +708,7 @@ void AvalStr_end(AvalStr *pfunc)
      
      break;
    default:
+	break;
    }
  }
 

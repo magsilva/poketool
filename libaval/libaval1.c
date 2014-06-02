@@ -316,6 +316,7 @@ long no_func_invoc = *func_no_invoc;
 	     }
            break;
          default:
+		break;
            /* Ja' foi registrada a primeira ocorrencia da associacao */
          }
            

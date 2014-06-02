@@ -18,9 +18,8 @@
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #
 
-HOME=/home/mchaim/projetos
-
-FNTS =  $(HOME)/newpoke
+FNTS = /home/magsilva/Projects/Poke-Tool
+ARCHIT=x86_64
 MODL = 
 SRCS = libaval0.c libaval1.c libaval2.c libaval3.c libaval4.c \
        libmainava2.c libitoa.c
